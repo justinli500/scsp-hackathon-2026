@@ -49,7 +49,10 @@
   button.cta.secondary:hover { background: rgba(213,159,58,0.08); border-color: var(--accent); }
   button.cta.secondary:disabled { background: transparent; color: var(--fg-mute); border-color: var(--rule); cursor: not-allowed; }
 
-  section.output { padding: 24px 36px; max-width: 920px; }
+  section.output { padding: 24px 36px; max-width: 920px; transition: max-width 120ms; }
+  /* When transcript split is on, drop the reading-column cap so AAR + transcript
+     each get a usable column. The eval/gap panes happily fill the extra width. */
+  body.split section.output { max-width: none; }
   .placeholder { color: var(--fg-mute); padding-top: 48px; }
   .placeholder code { background: var(--bg-3); padding: 1px 6px; }
 
@@ -82,6 +85,209 @@
   .modal .close { float: right; cursor: pointer; color: var(--fg-mute); }
 
   .legend { color: var(--fg-mute); font-size: 11px; margin-top: 14px; line-height: 1.6; }
+
+  /* ====== Tabs ====== */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--rule); margin: 24px 0 14px; }
+  .tab { padding: 8px 14px; cursor: pointer; color: var(--fg-mute); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 80ms, border-color 80ms; }
+  .tab:hover { color: var(--fg-dim); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab .badge { display: inline-block; margin-left: 6px; padding: 1px 5px; font-size: 10px; background: var(--bg-3); color: var(--fg-dim); border: 1px solid var(--rule); }
+  .tab.active .badge { color: var(--accent); border-color: var(--accent-dim); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  /* ====== Timeline ====== */
+  .timeline-wrap { background: var(--bg-2); border: 1px solid var(--rule); padding: 14px 18px 18px; margin-bottom: 16px; }
+  .timeline-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+  .timeline-head .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg-dim); }
+  .timeline-head .legend-inline { font-size: 11px; color: var(--fg-mute); display: flex; gap: 14px; flex-wrap: wrap; }
+  .timeline-head .legend-inline .swatch { display: inline-block; width: 8px; height: 8px; border-radius: 50%; vertical-align: middle; margin-right: 4px; }
+  .timeline-svg { display: block; width: 100%; height: 100px; overflow: visible; }
+  .tl-axis { stroke: var(--rule); stroke-width: 1; }
+  .tl-marker { cursor: pointer; transition: r 80ms; }
+  .tl-marker:hover { r: 9; }
+  .tl-marker.improve { fill: var(--bad); }
+  .tl-marker.sustain { fill: var(--good); }
+  .tl-marker.observation { fill: var(--fg-mute); }
+  .tl-marker.selected { stroke: var(--accent); stroke-width: 2; }
+  .tl-tick-label { fill: var(--fg-mute); font-size: 9px; font-family: var(--mono); }
+  .tl-badge-bg { fill: var(--bg-3); stroke: var(--accent-dim); stroke-width: 1; }
+  .tl-badge-text { fill: var(--accent); font-size: 8.5px; font-family: var(--mono); }
+  .tl-badge-link { cursor: pointer; }
+  .tl-tooltip { position: absolute; pointer-events: none; background: var(--bg-3); border: 1px solid var(--accent-dim); padding: 6px 9px; font-size: 11.5px; color: var(--fg); max-width: 320px; line-height: 1.4; z-index: 30; display: none; }
+  .tl-tooltip .tt-name { color: var(--accent); margin-bottom: 2px; font-weight: 600; }
+  .tl-tooltip .tt-meta { color: var(--fg-mute); font-size: 10.5px; margin-top: 4px; }
+
+  /* ====== Drill Panel ====== */
+  .drill-modal { width: min(960px, 92vw); max-height: 86vh; }
+  .drill-head { color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 4px; }
+  .drill-title { color: var(--fg); font-size: 14px; margin: 0 0 14px; }
+  .drill-chain { display: grid; grid-template-columns: 1fr 16px 1fr 16px 1fr; gap: 0; align-items: stretch; }
+  .drill-node { background: var(--bg-3); border: 1px solid var(--rule); padding: 12px 14px; min-height: 200px; display: flex; flex-direction: column; }
+  .drill-node.evidence { border-left: 2px solid var(--fg-dim); }
+  .drill-node.doctrine { border-left: 2px solid var(--accent); }
+  .drill-node.recommendation.improve { border-left: 2px solid var(--bad); }
+  .drill-node.recommendation.sustain { border-left: 2px solid var(--good); }
+  .drill-node.recommendation.observation { border-left: 2px solid var(--fg-mute); }
+  .drill-node h4 { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg-dim); }
+  .drill-node .body { color: var(--fg); font-size: 12px; line-height: 1.55; flex: 1; overflow: auto; max-height: 400px; }
+  .drill-node .body p { margin: 6px 0; }
+  .drill-node .entry { background: var(--bg-2); border-left: 2px solid var(--rule); padding: 6px 10px; margin: 6px 0; }
+  .drill-node .entry .speaker { color: var(--accent); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .drill-node .doctrine-pill { display: block; padding: 6px 10px; margin: 6px 0; background: var(--bg-2); border-left: 2px solid var(--accent-dim); cursor: pointer; transition: border-color 80ms; }
+  .drill-node .doctrine-pill:hover { border-left-color: var(--accent); background: rgba(213,159,58,0.05); }
+  .drill-node .doctrine-pill .citation { display: block; color: var(--accent); font-size: 11px; margin-bottom: 2px; border: none; }
+  .drill-node .doctrine-pill .id { color: var(--fg-mute); font-size: 10px; }
+  .drill-arrow { display: flex; align-items: center; justify-content: center; color: var(--accent-dim); font-size: 18px; }
+  .drill-section-meta { color: var(--fg-mute); font-size: 10.5px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--rule); }
+  .drill-empty { color: var(--fg-mute); font-style: italic; font-size: 11.5px; }
+
+  /* ====== Eval Panel ====== */
+  .eval-summary { display: flex; gap: 24px; padding: 14px 0; border-bottom: 1px solid var(--rule); margin-bottom: 14px; }
+  .eval-stat { }
+  .eval-stat .num { font-size: 22px; color: var(--accent); font-weight: 600; }
+  .eval-stat .num.bad { color: var(--bad); }
+  .eval-stat .num.good { color: var(--good); }
+  .eval-stat .lbl { font-size: 10.5px; color: var(--fg-mute); text-transform: uppercase; letter-spacing: 0.08em; }
+  .eval-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .eval-table th, .eval-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  .eval-table th { color: var(--fg-dim); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+  .eval-table .status-rec { color: var(--good); font-size: 11px; }
+  .eval-table .status-miss { color: var(--bad); font-size: 11px; }
+  .eval-table .matched-id { display: inline-block; margin-right: 4px; padding: 1px 6px; background: var(--bg-3); color: var(--accent); border: 1px solid var(--accent-dim); font-size: 10.5px; cursor: pointer; }
+  .eval-table .matched-id:hover { background: rgba(213,159,58,0.08); }
+  .eval-novel { padding: 14px 0; border-top: 1px solid var(--rule); margin-top: 8px; }
+  .eval-novel .heading { font-size: 11px; color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+
+  /* ====== Gap Panel ====== */
+  .gap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .gap-col h3 { font-size: 11px; color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 10px; }
+  .gap-col .col-meta { color: var(--fg-mute); font-size: 11px; margin-bottom: 10px; }
+  .gap-card { background: var(--bg-2); border: 1px solid var(--rule); padding: 10px 12px; margin-bottom: 8px; }
+  .gap-card.contradiction { border-left: 2px solid var(--bad); }
+  .gap-card.silence { border-left: 2px solid var(--accent-dim); }
+  .gap-card .fid { color: var(--accent); cursor: pointer; font-size: 11px; margin-right: 6px; }
+  .gap-card .fid:hover { text-decoration: underline; }
+  .gap-card .ftitle { color: var(--fg); font-size: 12px; margin: 4px 0; }
+  .gap-card .note { color: var(--fg-dim); font-size: 11.5px; line-height: 1.5; }
+  .gap-empty { color: var(--fg-mute); font-style: italic; font-size: 11.5px; padding: 10px 0; }
+
+  /* ====== Finding hover/click cue in AAR text ====== */
+  .finding-anchor { cursor: pointer; padding: 2px 4px; margin: -2px -4px; border-radius: 2px; transition: background 80ms; }
+  .finding-anchor:hover { background: rgba(213,159,58,0.08); outline: 1px solid var(--accent-dim); }
+
+  /* ====== Status panel ====== */
+  .analysis-status { color: var(--fg-mute); font-size: 11px; margin-top: 8px; }
+  .analysis-status.working { color: var(--accent); }
+  .analysis-status.done { color: var(--good); }
+  .analysis-status.error { color: var(--bad); }
+
+  /* ====== Transcript split-pane ====== */
+  /* When split mode is on, the AAR pane becomes a 2-col grid with the
+     transcript on the right. The timeline and tabs stay full-width above. */
+  .split-shell { display: block; }
+  body.split .split-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+  .transcript-pane {
+    display: none;
+    background: var(--bg-2);
+    border: 1px solid var(--rule);
+    padding: 14px 16px 16px;
+    position: sticky;
+    top: 60px;
+    max-height: calc(100vh - 80px);
+    overflow: auto;
+  }
+  body.split .transcript-pane { display: block; }
+  .transcript-pane .head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px; margin-bottom: 4px;
+    border-bottom: 1px solid var(--accent-dim); padding-bottom: 8px;
+  }
+  .transcript-pane .head .label {
+    font-size: 17px; font-weight: 700; letter-spacing: 0.04em;
+    color: var(--accent); text-transform: uppercase;
+  }
+  .transcript-pane .head .label .arrow { color: var(--accent-dim); margin-right: 6px; font-weight: 400; }
+  .transcript-pane .head .scenario-source { color: var(--fg-mute); font-size: 10.5px; text-align: right; }
+  .transcript-pane .compare-tag {
+    font-size: 10.5px; color: var(--fg-dim); margin-bottom: 10px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .transcript-pane .compare-tag strong { color: var(--accent); }
+  .transcript-pane .legend-row { font-size: 10.5px; color: var(--fg-mute); margin-bottom: 12px; line-height: 1.6; }
+  .transcript-pane .legend-row .swatch { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+
+  .ts-entry {
+    border-left: 3px solid var(--rule);
+    background: var(--bg);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background 80ms, border-left-color 80ms, transform 80ms;
+    position: relative;
+  }
+  .ts-entry:hover { transform: translateX(2px); }
+  .ts-entry.improve { border-left-color: var(--bad); background: rgba(201,112,112,0.06); }
+  .ts-entry.sustain { border-left-color: var(--good); background: rgba(111,168,107,0.06); }
+  .ts-entry.observation { border-left-color: var(--fg-mute); }
+  .ts-entry.cross-highlight {
+    background: rgba(213,159,58,0.14);
+    border-left-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent-dim);
+  }
+  .ts-entry .speaker {
+    color: var(--accent); font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: 0.06em; margin-bottom: 4px; display: flex; align-items: baseline; gap: 8px;
+  }
+  .ts-entry .speaker .ti { color: var(--fg-mute); font-size: 10px; }
+  .ts-entry .text { color: var(--fg); font-size: 12px; line-height: 1.55; }
+  .ts-entry .badges { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .ts-entry .badges .fbadge {
+    display: inline-block; padding: 1px 6px; font-size: 10px;
+    background: var(--bg-3); border: 1px solid var(--rule); color: var(--fg-dim);
+    cursor: pointer; transition: border-color 80ms, color 80ms;
+  }
+  .ts-entry .badges .fbadge.improve { border-color: rgba(201,112,112,0.5); color: var(--bad); }
+  .ts-entry .badges .fbadge.sustain { border-color: rgba(111,168,107,0.5); color: var(--good); }
+  .ts-entry .badges .fbadge:hover { background: rgba(213,159,58,0.08); border-color: var(--accent); color: var(--accent); }
+
+  /* Cross-highlight on the AAR side: a finding-anchor whose finding is
+     referenced by the transcript entry the user is hovering. */
+  .finding-anchor.cross-highlight {
+    background: rgba(213,159,58,0.18);
+    outline: 1px solid var(--accent);
+  }
+
+  /* Toggle button styled to match the existing CTAs but full-width below them. */
+  .btn-toggle-row { margin-top: 6px; }
+  button.cta.toggle-pressed { background: var(--accent); color: #1a120a; border-color: var(--accent); }
+
+  /* ====== Keys / legend (sidebar) ====== */
+  .keys { font-size: 11px; line-height: 1.5; color: var(--fg-dim); }
+  .keys .row { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+  .keys .row .lbl { color: var(--fg); }
+  .keys .row .lbl em { color: var(--fg-mute); font-style: normal; font-size: 10.5px; }
+  .keys hr { border: none; border-top: 1px solid var(--rule); margin: 8px 0; }
+  .keys .group-head { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg-mute); margin: 4px 0 4px; }
+  .keys .swatch-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .keys .swatch-dot.improve { background: var(--bad); }
+  .keys .swatch-dot.sustain { background: var(--good); }
+  .keys .swatch-dot.observation { background: var(--fg-mute); }
+  .keys .pill {
+    display: inline-block; padding: 1px 6px; font-size: 10.5px;
+    border: 1px solid var(--rule); flex-shrink: 0;
+  }
+  .keys .pill.cite { color: var(--accent); border-color: var(--accent-dim); border-bottom: 1px dotted var(--accent-dim); }
+  .keys .pill.fid { color: var(--bad); border-color: rgba(201,112,112,0.5); }
+  .keys .pill.fid.sustain { color: var(--good); border-color: rgba(111,168,107,0.5); }
+  .keys .pill.doctrine { color: var(--accent); background: var(--bg-3); border-color: var(--accent-dim); font-size: 10px; }
+  .keys .read-tip { color: var(--fg-mute); font-size: 10.5px; line-height: 1.55; padding: 6px 0; }
+  .keys .read-tip strong { color: var(--accent); }
 </style>
 </head>
 <body>
@@ -103,6 +309,11 @@
         <button class="cta" id="generate" disabled>Generate Fresh</button>
         <button class="cta secondary" id="replay" disabled>Replay Saved</button>
       </div>
+      <div class="btn-toggle-row">
+        <button class="cta secondary" id="toggle-transcript" disabled style="width: 100%;">
+          Show Transcript ⇄
+        </button>
+      </div>
       <div class="legend" id="status"></div>
     </section>
     <section>
@@ -113,18 +324,83 @@
         sources reach the page.
       </div>
     </section>
+
+    <section>
+      <h2>Keys</h2>
+      <div class="keys">
+        <div class="group-head">Colors</div>
+        <div class="row"><span class="swatch-dot improve"></span><span class="lbl">Improve <em>· flagged gap</em></span></div>
+        <div class="row"><span class="swatch-dot sustain"></span><span class="lbl">Sustain <em>· doctrine held</em></span></div>
+        <div class="row"><span class="swatch-dot observation"></span><span class="lbl">Observation <em>· no finding</em></span></div>
+        <hr/>
+        <div class="group-head">Symbols</div>
+        <div class="row"><span class="pill cite">[FM 3-0, p. 5]</span><span class="lbl">Doctrine cite — click to read</span></div>
+        <div class="row"><span class="pill fid">f5</span><span class="lbl">Finding — click for trace</span></div>
+        <div class="row"><span class="pill doctrine">ATP 7-100.3</span><span class="lbl">Doctrine source on timeline</span></div>
+        <hr/>
+        <div class="read-tip">
+          <strong>How to read.</strong> Red clusters on the timeline mark where the wargame went sideways; greens, where doctrine held. Hover a transcript entry (split view) to see which findings cite it.
+        </div>
+      </div>
+    </section>
   </aside>
 
-  <section class="output" id="output">
-    <div class="placeholder">
-      Pick a demo input on the left. The AAR will stream in section by section.
-      Click any bracketed citation to see the source doctrine chunk.
-      <br><br>
-      Pipeline check: <code>GET /api/health</code>.
+  <section class="output">
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="aar">AAR <span class="badge" id="aar-badge">—</span></div>
+      <div class="tab" data-tab="eval">Eval Harness <span class="badge">—</span></div>
+      <div class="tab" data-tab="gap">Doctrine Gaps <span class="badge">—</span></div>
     </div>
+
+    <div class="tab-pane active" id="aar-pane">
+      <div class="timeline-wrap" id="timeline-wrap" style="display: none;">
+        <div class="timeline-head">
+          <span class="label">Campaign Timeline</span>
+          <span class="legend-inline">
+            <span><span class="swatch" style="background: var(--bad)"></span>IMPROVE</span>
+            <span><span class="swatch" style="background: var(--good)"></span>SUSTAIN</span>
+            <span><span class="swatch" style="background: var(--fg-mute)"></span>Observation</span>
+            <span style="color: var(--accent-dim)">· badges link to doctrine</span>
+          </span>
+        </div>
+        <div id="timeline-svg-host"></div>
+        <div class="legend" style="margin-top: 6px;">
+          Click any marker to drill into the evidence → doctrine → recommendation chain.
+        </div>
+      </div>
+      <div class="analysis-status" id="analysis-status"></div>
+      <div class="split-shell">
+        <div id="output">
+          <div class="placeholder">
+            Pick a demo input on the left. The AAR will stream in section by section.
+            Click any bracketed citation to see the source doctrine chunk.
+            <br><br>
+            Pipeline check: <code>GET /api/health</code>.
+          </div>
+        </div>
+        <aside class="transcript-pane" id="transcript-pane">
+          <div class="head">
+            <span class="label"><span class="arrow">⇄</span>Wargame Transcript</span>
+            <span class="scenario-source" id="ts-source"></span>
+          </div>
+          <div class="compare-tag">
+            <strong>Compare</strong> · ground truth ↔ AAR findings
+          </div>
+          <div class="legend-row">
+            Entries are tinted by which findings reference them — hover an entry
+            to highlight matching findings in the AAR; click to drill in.
+          </div>
+          <div id="transcript-list"></div>
+        </aside>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="eval-pane"></div>
+    <div class="tab-pane" id="gap-pane"></div>
   </section>
 </main>
 
+<!-- Citation modal (existing) -->
 <div class="modal-bg" id="modal-bg">
   <div class="modal">
     <span class="close" id="modal-close">[close]</span>
@@ -133,6 +409,35 @@
     <div class="text" id="modal-text"></div>
   </div>
 </div>
+
+<!-- Drill panel (Feature 2) -->
+<div class="modal-bg" id="drill-bg">
+  <div class="modal drill-modal">
+    <span class="close" id="drill-close">[close]</span>
+    <div class="drill-head" id="drill-head"></div>
+    <h3 class="drill-title" id="drill-title"></h3>
+    <div class="drill-chain">
+      <div class="drill-node evidence">
+        <h4>1 · Transcript Evidence</h4>
+        <div class="body" id="drill-evidence"></div>
+      </div>
+      <div class="drill-arrow">→</div>
+      <div class="drill-node doctrine">
+        <h4>2 · Doctrine Basis</h4>
+        <div class="body" id="drill-doctrine"></div>
+      </div>
+      <div class="drill-arrow">→</div>
+      <div class="drill-node recommendation" id="drill-rec-node">
+        <h4>3 · Recommendation</h4>
+        <div class="body" id="drill-recommendation"></div>
+      </div>
+    </div>
+    <div class="drill-section-meta" id="drill-meta"></div>
+  </div>
+</div>
+
+<!-- Timeline tooltip (positioned via JS) -->
+<div class="tl-tooltip" id="tl-tooltip"></div>
 
 <script>
 // =============================================================
@@ -174,11 +479,16 @@ function clear(node) {
 }
 
 // Returns true if the viewport is currently scrolled to within ~80px of the
-// page bottom. Used to drive tail-mode auto-scroll: follow new content only
-// when the reader has not deliberately scrolled up.
+// page bottom AND the document is meaningfully taller than the viewport.
+// The second condition prevents the initial-replay jump-to-bottom: when the
+// AAR first starts streaming, the page is barely taller than the viewport,
+// so scrolled≈total trivially, which used to trigger an unwanted auto-scroll.
 function isNearBottom(threshold = 80) {
-  const scrolled = window.scrollY + window.innerHeight;
   const total = document.documentElement.scrollHeight;
+  if (total <= window.innerHeight * 1.4) return false;
+  const scrolled = window.scrollY + window.innerHeight;
+  // Only follow once the user has actually scrolled past the AAR header.
+  if (window.scrollY < 120) return false;
   return total - scrolled <= threshold;
 }
 
@@ -469,6 +779,679 @@ function handleEvent(ev, aarRoot, sections) {
 
 document.getElementById("generate").addEventListener("click", startGenerate);
 document.getElementById("replay").addEventListener("click", startReplay);
+
+// =============================================================
+// Analysis (timeline + drill + eval + gaps)
+// =============================================================
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+let lastAnalysis = null;       // most recent analysis JSON for the loaded demo
+let findingsById = {};         // f1 -> Finding
+let timelineMarkersByEntry = {}; // entry_index -> TimelineMarker
+
+function svgEl(tag, attrs) {
+  const e = document.createElementNS(SVG_NS, tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  return e;
+}
+
+async function runAnalysis() {
+  if (!selectedDemo) return;
+  const status = document.getElementById("analysis-status");
+  if (status) {
+    status.textContent = "Analyzing transcript ↔ findings ↔ doctrine…";
+    status.className = "analysis-status working";
+  }
+  try {
+    const r = await fetch("/api/analyze", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({demo_id: selectedDemo}),
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({detail: "unknown"}));
+      if (status) {
+        status.textContent = `Analysis unavailable: ${err.detail || r.status}`;
+        status.className = "analysis-status error";
+      }
+      return;
+    }
+    const data = await r.json();
+    lastAnalysis = data;
+    findingsById = {};
+    for (const f of data.findings || []) findingsById[f.id] = f;
+    timelineMarkersByEntry = {};
+    for (const m of data.timeline || []) timelineMarkersByEntry[m.entry_index] = m;
+    renderTimeline(data);
+    renderEval(data);
+    renderGaps(data);
+    renderTranscript(data);
+    decorateFindingsInAAR(data);
+    updateTabBadges(data);
+    const tbtn = document.getElementById("toggle-transcript");
+    if (tbtn) tbtn.disabled = false;
+    if (status) {
+      status.textContent = `Analysis complete · ${(data.findings || []).length} finding(s).`;
+      status.className = "analysis-status done";
+    }
+  } catch (err) {
+    console.error("analysis failed", err);
+    if (status) {
+      status.textContent = "Analysis failed (see console).";
+      status.className = "analysis-status error";
+    }
+  }
+}
+
+// ============= Timeline =============
+
+function renderTimeline(analysis) {
+  const wrap = document.getElementById("timeline-wrap");
+  if (!wrap) return;
+  wrap.style.display = "block";
+  const svgHost = document.getElementById("timeline-svg-host");
+  clear(svgHost);
+
+  const markers = analysis.timeline || [];
+  if (!markers.length) {
+    svgHost.appendChild(el("div", { cls: "drill-empty", text: "No timeline markers." }));
+    return;
+  }
+
+  const W = svgHost.clientWidth || 800;
+  const margin = { left: 30, right: 30, top: 20, bottom: 28 };
+  const innerW = W - margin.left - margin.right;
+  const baselineY = 50;
+
+  const svg = svgEl("svg", { class: "timeline-svg", viewBox: `0 0 ${W} 100` });
+
+  // Axis line
+  svg.appendChild(svgEl("line", {
+    class: "tl-axis",
+    x1: margin.left, x2: margin.left + innerW,
+    y1: baselineY, y2: baselineY,
+  }));
+
+  const step = markers.length > 1 ? innerW / (markers.length - 1) : 0;
+  const cx = (i) => margin.left + (markers.length > 1 ? i * step : innerW / 2);
+
+  // Tick labels at start, midpoint, end
+  const tickIdxs = markers.length <= 4
+    ? markers.map((_, i) => i)
+    : [0, Math.floor(markers.length / 2), markers.length - 1];
+  for (const i of tickIdxs) {
+    const lbl = svgEl("text", {
+      class: "tl-tick-label",
+      x: cx(i), y: baselineY + 16,
+      "text-anchor": "middle",
+    });
+    lbl.textContent = `T${i}`;
+    svg.appendChild(lbl);
+  }
+
+  // Doctrine pill badges (above markers that have citations)
+  // Group by source_stem prefix so the badge label is short like "ATP 7-100.3".
+  for (let i = 0; i < markers.length; i++) {
+    const m = markers[i];
+    if (!m.citation_chunk_ids || !m.citation_chunk_ids.length) continue;
+    const sources = uniq(m.citation_chunk_ids.map(cidToShortLabel));
+    // Only show first 2 to avoid crowding.
+    const labels = sources.slice(0, 2);
+    let yOff = baselineY - 18;
+    for (const lab of labels) {
+      const w = Math.min(80, 8 + lab.length * 5.4);
+      const x = cx(i) - w / 2;
+      const g = svgEl("g", { class: "tl-badge-link" });
+      g.appendChild(svgEl("rect", {
+        class: "tl-badge-bg",
+        x: x, y: yOff - 9,
+        width: w, height: 12, rx: 1,
+      }));
+      const t = svgEl("text", {
+        class: "tl-badge-text",
+        x: cx(i), y: yOff,
+        "text-anchor": "middle",
+      });
+      t.textContent = lab;
+      g.appendChild(t);
+      // Click badge → open first matching citation chunk modal.
+      const firstMatch = m.citation_chunk_ids.find(cid => cidToShortLabel(cid) === lab);
+      if (firstMatch) {
+        g.addEventListener("click", (ev) => { ev.stopPropagation(); openCitation(firstMatch); });
+      }
+      svg.appendChild(g);
+      yOff -= 14;
+    }
+  }
+
+  // Markers
+  for (let i = 0; i < markers.length; i++) {
+    const m = markers[i];
+    const c = svgEl("circle", {
+      class: `tl-marker ${m.classification}`,
+      cx: cx(i), cy: baselineY, r: 6,
+      "data-entry": i,
+    });
+    c.addEventListener("mouseenter", (ev) => showTooltip(ev, m));
+    c.addEventListener("mousemove", moveTooltip);
+    c.addEventListener("mouseleave", hideTooltip);
+    c.addEventListener("click", () => openDrillForEntry(m.entry_index));
+    svg.appendChild(c);
+  }
+
+  svgHost.appendChild(svg);
+}
+
+function cidToShortLabel(cid) {
+  // chunk_id format: "fm3_0:p183-185:c308" → "FM 3-0"
+  const stem = cid.split(":")[0];
+  const map = {
+    "jp5_0": "JP 5-0",
+    "jp3_0": "JP 3-0",
+    "fm3_0": "FM 3-0",
+    "fm5_0": "FM 5-0",
+    "atp7_100_3": "ATP 7-100.3",
+    "aar_leaders_guide_2013": "AAR LG '13",
+  };
+  return map[stem] || stem.toUpperCase();
+}
+
+function uniq(arr) {
+  const seen = new Set(); const out = [];
+  for (const x of arr) { if (!seen.has(x)) { seen.add(x); out.push(x); } }
+  return out;
+}
+
+function showTooltip(ev, marker) {
+  const tt = document.getElementById("tl-tooltip");
+  clear(tt);
+  tt.appendChild(el("div", { cls: "tt-name", text: marker.name }));
+  tt.appendChild(el("div", { text: marker.summary }));
+  const findings = (marker.finding_ids || []).map(id => findingsById[id]).filter(Boolean);
+  if (findings.length) {
+    const types = findings.map(f => `${f.type}: ${f.title}`).join(" · ");
+    tt.appendChild(el("div", { cls: "tt-meta", text: types }));
+  } else {
+    tt.appendChild(el("div", { cls: "tt-meta", text: "No findings reference this entry." }));
+  }
+  tt.style.display = "block";
+  moveTooltip(ev);
+}
+function moveTooltip(ev) {
+  const tt = document.getElementById("tl-tooltip");
+  const pad = 14;
+  let x = ev.clientX + pad;
+  let y = ev.clientY + pad;
+  // Keep on screen
+  const rect = tt.getBoundingClientRect();
+  if (x + rect.width > window.innerWidth - 10) x = ev.clientX - rect.width - pad;
+  if (y + rect.height > window.innerHeight - 10) y = ev.clientY - rect.height - pad;
+  tt.style.left = x + "px";
+  tt.style.top = y + "px";
+}
+function hideTooltip() {
+  document.getElementById("tl-tooltip").style.display = "none";
+}
+
+// ============= Drill panel =============
+
+function openDrillForEntry(entryIndex) {
+  const marker = timelineMarkersByEntry[entryIndex];
+  if (!marker) return;
+  const findings = (marker.finding_ids || []).map(id => findingsById[id]).filter(Boolean);
+  if (findings.length === 0) {
+    // Marker with no finding: show a minimal panel.
+    openDrill({ entryIndexes: [entryIndex], finding: null });
+    return;
+  }
+  // Default to the first finding; could add a switcher later.
+  openDrill({ entryIndexes: findings[0].transcript_entry_indexes || [entryIndex], finding: findings[0] });
+}
+
+function openDrillForFinding(findingId) {
+  const f = findingsById[findingId];
+  if (!f) return;
+  openDrill({ entryIndexes: f.transcript_entry_indexes || [], finding: f });
+}
+
+function openDrill({ entryIndexes, finding }) {
+  hideTooltip();
+  const head = document.getElementById("drill-head");
+  const title = document.getElementById("drill-title");
+  const recNode = document.getElementById("drill-rec-node");
+  const evidence = document.getElementById("drill-evidence");
+  const doctrine = document.getElementById("drill-doctrine");
+  const rec = document.getElementById("drill-recommendation");
+  const meta = document.getElementById("drill-meta");
+  clear(evidence); clear(doctrine); clear(rec); clear(meta);
+
+  recNode.classList.remove("improve", "sustain", "observation");
+  if (finding) {
+    head.textContent = `${finding.type} · ${finding.id} · ${SECTION_LABELS[finding.section_id] || finding.section_id}`;
+    title.textContent = finding.title;
+    recNode.classList.add(finding.type.toLowerCase());
+  } else {
+    head.textContent = "Transcript moment";
+    title.textContent = "No finding directly anchors this entry.";
+    recNode.classList.add("observation");
+  }
+
+  // 1. Evidence — pull entries from analysis.transcript_entries by index.
+  const entries = (lastAnalysis && lastAnalysis.transcript_entries) || [];
+  if (!entryIndexes.length) {
+    evidence.appendChild(el("div", { cls: "drill-empty", text: "No transcript entries linked to this finding." }));
+  } else {
+    for (const idx of entryIndexes) {
+      const e = entries[idx];
+      if (!e) continue;
+      const card = el("div", { cls: "entry" });
+      card.appendChild(el("div", { cls: "speaker", text: `[${idx}] ${e.name}` }));
+      card.appendChild(el("div", { text: e.text }));
+      evidence.appendChild(card);
+    }
+  }
+
+  // 2. Doctrine — list each cited chunk as a clickable pill that opens the citation modal.
+  const cids = finding ? (finding.citation_chunk_ids || []) : [];
+  if (!cids.length) {
+    doctrine.appendChild(el("div", { cls: "drill-empty", text: "No doctrinal passages cited for this finding." }));
+  } else {
+    for (const cid of cids) {
+      const pill = el("div", { cls: "doctrine-pill" });
+      pill.appendChild(el("span", { cls: "citation", text: cidToFullLabel(cid) }));
+      pill.appendChild(el("span", { cls: "id", text: cid }));
+      pill.addEventListener("click", () => openCitation(cid));
+      doctrine.appendChild(pill);
+    }
+    if (finding && finding.doctrinal_basis) {
+      const note = el("div", { cls: "drill-section-meta" });
+      note.appendChild(document.createTextNode(finding.doctrinal_basis));
+      doctrine.appendChild(note);
+    }
+  }
+
+  // 3. Recommendation — "What to do about it" if present, else why/what_actual.
+  if (!finding) {
+    rec.appendChild(el("div", { cls: "drill-empty", text: "Click a marker tied to a finding to see the recommendation chain." }));
+  } else {
+    if (finding.what_actual) {
+      rec.appendChild(el("div", null, el("strong", { text: "What actually happened: " }), document.createTextNode(finding.what_actual)));
+    }
+    if (finding.why) {
+      rec.appendChild(el("div", null, el("strong", { text: "Why: " }), document.createTextNode(finding.why)));
+    }
+    if (finding.what_to_do) {
+      rec.appendChild(el("div", null, el("strong", { text: "What to do: " }), document.createTextNode(finding.what_to_do)));
+    } else if (finding.type === "SUSTAIN") {
+      rec.appendChild(el("div", { cls: "drill-section-meta", text: "SUSTAIN findings carry no corrective action by doctrine — preserve and replicate." }));
+    }
+  }
+
+  if (finding && finding.what_supposed) {
+    const supBlock = el("div", { cls: "drill-section-meta" });
+    supBlock.appendChild(el("strong", { text: "Intended: " }));
+    supBlock.appendChild(document.createTextNode(finding.what_supposed));
+    meta.appendChild(supBlock);
+  }
+
+  document.getElementById("drill-bg").classList.add("open");
+}
+
+function cidToFullLabel(cid) {
+  // Best-effort label based on chunk_id stem and page range.
+  // chunk_id like "fm3_0:p183-185:c308" → "FM 3-0, pp. 183-185"
+  const parts = cid.split(":");
+  if (parts.length < 2) return cid;
+  const src = cidToShortLabel(cid);
+  const pageBlock = parts[1].replace(/^p/, "").replace("-", "–");
+  if (pageBlock.includes("–")) {
+    const [a, b] = pageBlock.split("–");
+    if (a === b) return `${src}, p. ${a}`;
+    return `${src}, pp. ${pageBlock}`;
+  }
+  return `${src}, p. ${pageBlock}`;
+}
+
+document.getElementById("drill-close").addEventListener("click", () => {
+  document.getElementById("drill-bg").classList.remove("open");
+});
+document.getElementById("drill-bg").addEventListener("click", (e) => {
+  if (e.target.id === "drill-bg") e.target.classList.remove("open");
+});
+
+// ============= Decorate AAR findings as clickable =============
+
+function decorateFindingsInAAR(analysis) {
+  // For each finding, find a paragraph/list-item containing its title text and
+  // wrap the matching strong element in a clickable anchor that opens the drill.
+  // Strict text match — we don't inject into raw markdown.
+  const candidates = document.querySelectorAll(".aar strong");
+  for (const f of analysis.findings || []) {
+    const want = f.title.trim();
+    for (const node of candidates) {
+      if (node.dataset.findingBound) continue;
+      const txt = (node.textContent || "").trim().replace(/\.$/, "");
+      // Allow a short prefix match: many finding titles end with periods that
+      // the parser already stripped. Also allow "(SUSTAIN)/(IMPROVE)" suffixes.
+      const stripped = txt.replace(/\s*\((?:SUSTAIN|IMPROVE)\)\s*$/i, "").trim();
+      if (stripped === want || stripped.startsWith(want) || want.startsWith(stripped)) {
+        node.classList.add("finding-anchor");
+        node.dataset.findingBound = "1";
+        node.dataset.findingId = f.id;
+        node.title = `Click to open reasoning trace · ${f.id}`;
+        node.addEventListener("click", () => openDrillForFinding(f.id));
+        // Bidirectional hover: lighting up matching transcript entries.
+        node.addEventListener("mouseenter", () => crossHighlightFromFinding(f.id, true));
+        node.addEventListener("mouseleave", () => crossHighlightFromFinding(f.id, false));
+        break;
+      }
+    }
+  }
+}
+
+// =============================================================
+// Transcript split-pane (right side)
+// =============================================================
+
+let splitMode = false;
+
+function renderTranscript(analysis) {
+  const list = document.getElementById("transcript-list");
+  if (!list) return;
+  clear(list);
+  const entries = analysis.transcript_entries || [];
+  const markers = analysis.timeline || [];
+  const markerByIdx = {};
+  for (const m of markers) markerByIdx[m.entry_index] = m;
+
+  // Source/scenario footer
+  const scenarioEl = document.getElementById("ts-source");
+  if (scenarioEl) {
+    const demo = (document.querySelector(".demo-row.active .meta") || {}).textContent || "";
+    scenarioEl.textContent = demo;
+  }
+
+  for (const e of entries) {
+    const m = markerByIdx[e.index] || { classification: "observation", finding_ids: [] };
+    const card = el("div", {
+      cls: `ts-entry ${m.classification}`,
+      attrs: { "data-entry-index": String(e.index) },
+    });
+
+    const speaker = el("div", { cls: "speaker" });
+    speaker.appendChild(document.createTextNode(e.name));
+    speaker.appendChild(el("span", { cls: "ti", text: `T${e.index}` }));
+    card.appendChild(speaker);
+
+    card.appendChild(el("div", { cls: "text", text: e.text }));
+
+    if (m.finding_ids && m.finding_ids.length) {
+      const badges = el("div", { cls: "badges" });
+      for (const fid of m.finding_ids) {
+        const f = findingsById[fid];
+        const cls = f ? f.type.toLowerCase() : "";
+        const b = el("span", {
+          cls: `fbadge ${cls}`,
+          text: fid,
+          attrs: { title: f ? `${f.type} · ${f.title}` : fid },
+        });
+        b.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openDrillForFinding(fid);
+        });
+        b.addEventListener("mouseenter", (ev) => { ev.stopPropagation(); crossHighlightFromFinding(fid, true); });
+        b.addEventListener("mouseleave", (ev) => { ev.stopPropagation(); crossHighlightFromFinding(fid, false); });
+        badges.appendChild(b);
+      }
+      card.appendChild(badges);
+    }
+
+    // Hover entry → highlight all finding anchors that reference it.
+    card.addEventListener("mouseenter", () => crossHighlightFromEntry(e.index, true));
+    card.addEventListener("mouseleave", () => crossHighlightFromEntry(e.index, false));
+    card.addEventListener("click", () => openDrillForEntry(e.index));
+
+    list.appendChild(card);
+  }
+}
+
+function crossHighlightFromEntry(entryIndex, on) {
+  const marker = timelineMarkersByEntry[entryIndex];
+  if (!marker) return;
+  for (const fid of marker.finding_ids || []) {
+    document.querySelectorAll(`.finding-anchor[data-finding-id="${fid}"]`)
+      .forEach(n => n.classList.toggle("cross-highlight", on));
+  }
+}
+
+function crossHighlightFromFinding(findingId, on) {
+  const f = findingsById[findingId];
+  if (!f) return;
+  for (const idx of f.transcript_entry_indexes || []) {
+    document.querySelectorAll(`.ts-entry[data-entry-index="${idx}"]`)
+      .forEach(n => n.classList.toggle("cross-highlight", on));
+  }
+}
+
+function setSplitMode(on) {
+  splitMode = on;
+  document.body.classList.toggle("split", on);
+  const btn = document.getElementById("toggle-transcript");
+  if (btn) {
+    btn.textContent = on ? "Hide Transcript ⇄" : "Show Transcript ⇄";
+    btn.classList.toggle("toggle-pressed", on);
+  }
+}
+
+document.getElementById("toggle-transcript").addEventListener("click", () => {
+  if (!lastAnalysis) return;
+  setSplitMode(!splitMode);
+});
+
+// ============= Eval panel =============
+
+function renderEval(analysis) {
+  const host = document.getElementById("eval-pane");
+  if (!host) return;
+  clear(host);
+  const ev = analysis.eval || { available: false };
+  if (!ev.available) {
+    host.appendChild(el("div", { cls: "drill-empty", text: "Eval harness only runs against published CSIS ground truth (csis_first_battle demo)." }));
+    return;
+  }
+
+  // Summary stats
+  const summary = el("div", { cls: "eval-summary" });
+  summary.appendChild(el("div", { cls: "eval-stat" },
+    el("div", { cls: ev.recovered === ev.total ? "num good" : "num", text: `${ev.recovered} / ${ev.total}` }),
+    el("div", { cls: "lbl", text: "CSIS findings recovered" }),
+  ));
+  summary.appendChild(el("div", { cls: "eval-stat" },
+    el("div", { cls: "num", text: String((ev.novel_finding_ids || []).length) }),
+    el("div", { cls: "lbl", text: "Novel findings" }),
+  ));
+  const missed = ev.total - ev.recovered;
+  summary.appendChild(el("div", { cls: "eval-stat" },
+    el("div", { cls: missed > 0 ? "num bad" : "num good", text: String(missed) }),
+    el("div", { cls: "lbl", text: "Missed" }),
+  ));
+  host.appendChild(summary);
+
+  // Table
+  const table = el("table", { cls: "eval-table" });
+  const thead = el("thead");
+  const trh = el("tr");
+  for (const h of ["#", "CSIS finding", "Status", "Matched", "Rationale"]) {
+    trh.appendChild(el("th", { text: h }));
+  }
+  thead.appendChild(trh);
+  table.appendChild(thead);
+  const tbody = el("tbody");
+  for (const row of ev.rows || []) {
+    const tr = el("tr");
+    tr.appendChild(el("td", { text: row.ground_truth_id }));
+    tr.appendChild(el("td", { text: row.ground_truth_text }));
+    tr.appendChild(el("td", null,
+      row.recovered
+        ? el("span", { cls: "status-rec", text: "✓ recovered" })
+        : el("span", { cls: "status-miss", text: "✗ missed" }),
+    ));
+    const matchedCell = el("td");
+    for (const fid of row.matched_finding_ids || []) {
+      const pill = el("span", { cls: "matched-id", text: fid });
+      pill.addEventListener("click", () => openDrillForFinding(fid));
+      matchedCell.appendChild(pill);
+    }
+    tr.appendChild(matchedCell);
+    tr.appendChild(el("td", { text: row.rationale || "" }));
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  host.appendChild(table);
+
+  // Novel
+  if ((ev.novel_finding_ids || []).length) {
+    const nov = el("div", { cls: "eval-novel" });
+    nov.appendChild(el("div", { cls: "heading", text: "Findings not in CSIS published set" }));
+    const wrap = el("div");
+    for (const fid of ev.novel_finding_ids) {
+      const f = findingsById[fid];
+      const pill = el("span", { cls: "matched-id", text: f ? `${fid} · ${f.title}` : fid });
+      pill.style.marginRight = "6px";
+      pill.style.marginBottom = "4px";
+      pill.addEventListener("click", () => openDrillForFinding(fid));
+      wrap.appendChild(pill);
+    }
+    nov.appendChild(wrap);
+    host.appendChild(nov);
+  }
+}
+
+// ============= Gap panel =============
+
+function renderGaps(analysis) {
+  const host = document.getElementById("gap-pane");
+  if (!host) return;
+  clear(host);
+  const gaps = analysis.gaps || { contradictions: [], silences: [] };
+
+  const grid = el("div", { cls: "gap-grid" });
+
+  function renderColumn(title, blurb, items, cls) {
+    const col = el("div", { cls: "gap-col" });
+    col.appendChild(el("h3", { text: title }));
+    col.appendChild(el("div", { cls: "col-meta", text: blurb }));
+    if (!items.length) {
+      col.appendChild(el("div", { cls: "gap-empty", text: "None flagged for this AAR." }));
+      return col;
+    }
+    for (const g of items) {
+      const f = findingsById[g.finding_id];
+      const card = el("div", { cls: `gap-card ${cls}` });
+      const head = el("div");
+      const fid = el("span", { cls: "fid", text: g.finding_id });
+      fid.addEventListener("click", () => openDrillForFinding(g.finding_id));
+      head.appendChild(fid);
+      if (f) head.appendChild(document.createTextNode("→ jump to finding"));
+      card.appendChild(head);
+      if (f) card.appendChild(el("div", { cls: "ftitle", text: f.title }));
+      card.appendChild(el("div", { cls: "note", text: g.note }));
+      col.appendChild(card);
+    }
+    return col;
+  }
+
+  grid.appendChild(renderColumn(
+    "Contradictions",
+    "Findings where the wargame outcome diverges from doctrine — flag as doctrine-validity questions.",
+    gaps.contradictions || [], "contradiction",
+  ));
+  grid.appendChild(renderColumn(
+    "Silences",
+    "Findings where the corpus offered no clear guidance — flag as J7 research questions.",
+    gaps.silences || [], "silence",
+  ));
+  host.appendChild(grid);
+}
+
+// ============= Tabs =============
+
+function setupTabs() {
+  const tabs = document.querySelectorAll(".tab");
+  for (const t of tabs) {
+    t.addEventListener("click", () => {
+      const target = t.dataset.tab;
+      tabs.forEach(x => x.classList.toggle("active", x === t));
+      document.querySelectorAll(".tab-pane").forEach(p => {
+        p.classList.toggle("active", p.id === `${target}-pane`);
+      });
+    });
+  }
+}
+
+function updateTabBadges(analysis) {
+  const evTab = document.querySelector('.tab[data-tab="eval"] .badge');
+  const gapTab = document.querySelector('.tab[data-tab="gap"] .badge');
+  if (evTab) {
+    if (analysis.eval && analysis.eval.available) {
+      evTab.textContent = `${analysis.eval.recovered}/${analysis.eval.total}`;
+    } else {
+      evTab.textContent = "—";
+    }
+  }
+  if (gapTab) {
+    const c = (analysis.gaps?.contradictions || []).length;
+    const s = (analysis.gaps?.silences || []).length;
+    gapTab.textContent = `${c + s}`;
+  }
+}
+
+// =============================================================
+// Hook analysis into stream completion + load existing analysis
+// =============================================================
+
+const _origStream = streamFromEndpoint;
+window.streamFromEndpoint = async function(endpoint, label) {
+  // Don't trample in-progress state if the user clicks twice. inFlight is set
+  // inside the inner stream function; bail out before we reset anything.
+  if (inFlight || !selectedDemo) return;
+  resetAnalysisUI();
+  await _origStream(endpoint, label);
+  // Only run analysis once the stream actually completed (cache is fresh).
+  // The inner function flips inFlight to false at the end of every successful
+  // run, including the early-error paths.
+  if (!inFlight) await runAnalysis();
+};
+// Re-bind buttons to use the wrapped function.
+document.getElementById("generate").removeEventListener("click", startGenerate);
+document.getElementById("replay").removeEventListener("click", startReplay);
+document.getElementById("generate").addEventListener("click", () => window.streamFromEndpoint("/api/generate", "Generating fresh…"));
+document.getElementById("replay").addEventListener("click", () => window.streamFromEndpoint("/api/replay", "Replaying saved…"));
+
+function resetAnalysisUI() {
+  lastAnalysis = null;
+  findingsById = {};
+  timelineMarkersByEntry = {};
+  const tw = document.getElementById("timeline-wrap");
+  if (tw) tw.style.display = "none";
+  for (const id of ["eval-pane", "gap-pane", "transcript-list"]) {
+    const n = document.getElementById(id);
+    if (n) clear(n);
+  }
+  const status = document.getElementById("analysis-status");
+  if (status) { status.textContent = ""; status.className = "analysis-status"; }
+  // Reset tab badges
+  for (const sel of ['.tab[data-tab="eval"] .badge', '.tab[data-tab="gap"] .badge']) {
+    const b = document.querySelector(sel);
+    if (b) b.textContent = "—";
+  }
+  // Collapse split mode and disable the toggle until analysis arrives.
+  setSplitMode(false);
+  const tbtn = document.getElementById("toggle-transcript");
+  if (tbtn) tbtn.disabled = true;
+}
+
+setupTabs();
 loadHealth();
 loadDemos();
 </script>
