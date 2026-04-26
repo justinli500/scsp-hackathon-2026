@@ -25,6 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from . import retrieval
 from .analyze import analyze, section_markdowns_from_events
 from .generate import generate_full_aar_streaming
+from .ingest import DOC_REGISTRY
 from .transcript import load as load_transcript
 
 load_dotenv()
@@ -199,6 +200,26 @@ def _list_demos() -> list[dict]:
 @app.get("/api/demos")
 def demos():
     return _list_demos()
+
+
+@app.get("/api/doctrine")
+def doctrine_library():
+    """List the doctrine PDFs available for direct viewing. Each entry carries
+    the canonical citation title plus a URL the UI can link to."""
+    raw_dir = REPO_ROOT / "corpus" / "raw"
+    out: list[dict] = []
+    for pdf in sorted(raw_dir.glob("*.pdf")):
+        stem = pdf.stem
+        title, doc_type = DOC_REGISTRY.get(stem, (stem, "Doc"))
+        out.append({
+            "stem": stem,
+            "title": title,
+            "doc_type": doc_type,
+            "filename": pdf.name,
+            "url": f"/doctrine/{pdf.name}",
+            "size_bytes": pdf.stat().st_size,
+        })
+    return out
 
 
 @app.get("/api/chunk/{chunk_id:path}")
@@ -377,6 +398,12 @@ def index():
 # Serve any additional UI assets if they appear later.
 if UI_DIR.exists():
     app.mount("/ui", StaticFiles(directory=str(UI_DIR)), name="ui")
+
+# Serve the source doctrine PDFs so the reference-library modal can link
+# directly to them. Read-only; no upload path.
+DOCTRINE_RAW_DIR = REPO_ROOT / "corpus" / "raw"
+if DOCTRINE_RAW_DIR.exists():
+    app.mount("/doctrine", StaticFiles(directory=str(DOCTRINE_RAW_DIR)), name="doctrine")
 
 
 def _main():

@@ -26,10 +26,44 @@
   header .sub { color: var(--fg-dim); font-size: 12px; }
   header .spacer { flex: 1; }
   header .health { color: var(--fg-mute); font-size: 11.5px; }
+  header .header-btn {
+    background: transparent; color: var(--accent);
+    border: 1px solid var(--accent-dim); padding: 5px 12px;
+    font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.08em; cursor: pointer; transition: background 80ms, border-color 80ms;
+    margin-right: 14px;
+  }
+  header .header-btn:hover { background: rgba(213,159,58,0.08); border-color: var(--accent); }
+
+  /* Reference library modal entries */
+  .lib-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .lib-row {
+    display: flex; align-items: baseline; gap: 12px;
+    padding: 10px 12px; background: var(--bg-3); border: 1px solid var(--rule);
+    border-left: 2px solid var(--accent-dim);
+    cursor: pointer; transition: border-left-color 80ms, background 80ms;
+    text-decoration: none; color: inherit;
+  }
+  .lib-row:hover { border-left-color: var(--accent); background: rgba(213,159,58,0.05); }
+  .lib-row .title { color: var(--accent); font-size: 12.5px; flex: 1; }
+  .lib-row .type { color: var(--fg-dim); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .lib-row .size { color: var(--fg-mute); font-size: 10.5px; }
+  .lib-row .arrow { color: var(--accent-dim); font-size: 12px; }
+  .lib-row:hover .arrow { color: var(--accent); }
 
   main { display: grid; grid-template-columns: 320px 1fr; min-height: calc(100vh - 44px); }
 
-  aside.controls { border-right: 1px solid var(--rule); padding: 18px; background: var(--bg-2); }
+  aside.controls {
+    border-right: 1px solid var(--rule); padding: 18px; background: var(--bg-2);
+    /* Sidebar scrolls independently of the page so the Keys legend stays
+       reachable on small viewports without dragging the AAR with it. */
+    position: sticky; top: 44px; align-self: start;
+    max-height: calc(100vh - 44px); overflow-y: auto;
+    /* Hide the scrollbar chrome — keep scrolling fully functional. */
+    scrollbar-width: none;       /* Firefox */
+    -ms-overflow-style: none;    /* legacy IE/Edge */
+  }
+  aside.controls::-webkit-scrollbar { width: 0; height: 0; }   /* Chrome/Safari */
   aside.controls h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--fg-dim); margin: 0 0 8px; }
   aside.controls section { margin-bottom: 22px; }
 
@@ -295,6 +329,7 @@
   <div class="brand">DOCTRINAL AAR</div>
   <div class="sub">SCSP Hackathon 2026 · doctrine-grounded after-action reviews</div>
   <div class="spacer"></div>
+  <button class="header-btn" id="open-library">Reference Library ↗</button>
   <div class="health" id="health">…</div>
 </header>
 
@@ -338,8 +373,22 @@
         <div class="row"><span class="pill fid">f5</span><span class="lbl">Finding — click for trace</span></div>
         <div class="row"><span class="pill doctrine">ATP 7-100.3</span><span class="lbl">Doctrine source on timeline</span></div>
         <hr/>
+        <div class="group-head">Panels</div>
+        <div class="read-tip" style="padding-top:2px;">
+          <strong>Timeline</strong> · <em style="color:var(--fg-dim);font-style:normal;">when findings cluster in campaign time.</em>
+        </div>
+        <div class="read-tip" style="padding-top:2px;">
+          <strong>Drill</strong> · <em style="color:var(--fg-dim);font-style:normal;">why a finding was concluded — evidence → doctrine → recommendation.</em>
+        </div>
+        <div class="read-tip" style="padding-top:2px;">
+          <strong>Eval</strong> · <em style="color:var(--fg-dim);font-style:normal;">recovery against the published CSIS findings.</em>
+        </div>
+        <div class="read-tip" style="padding-top:2px;">
+          <strong>Gaps</strong> · <em style="color:var(--fg-dim);font-style:normal;">where doctrine is silent or contradicted.</em>
+        </div>
+        <hr/>
         <div class="read-tip">
-          <strong>How to read.</strong> Red clusters on the timeline mark where the wargame went sideways; greens, where doctrine held. Hover a transcript entry (split view) to see which findings cite it.
+          Red clusters on the timeline mark where the wargame went sideways; greens, where doctrine held.
         </div>
       </div>
     </section>
@@ -1027,11 +1076,11 @@ function openDrill({ entryIndexes, finding }) {
 
   recNode.classList.remove("improve", "sustain", "observation");
   if (finding) {
-    head.textContent = `${finding.type} · ${finding.id} · ${SECTION_LABELS[finding.section_id] || finding.section_id}`;
+    head.textContent = `Reasoning trace · ${finding.type} · ${finding.id} · ${SECTION_LABELS[finding.section_id] || finding.section_id}`;
     title.textContent = finding.title;
     recNode.classList.add(finding.type.toLowerCase());
   } else {
-    head.textContent = "Transcript moment";
+    head.textContent = "Reasoning trace · transcript moment";
     title.textContent = "No finding directly anchors this entry.";
     recNode.classList.add("observation");
   }
@@ -1070,10 +1119,24 @@ function openDrill({ entryIndexes, finding }) {
     }
   }
 
-  // 3. Recommendation — "What to do about it" if present, else why/what_actual.
+  // 3. Recommendation — leads with the doctrinal posture (SUSTAIN / IMPROVE)
+  // so the reader sees the AAR construct, not a generic "details" block.
   if (!finding) {
     rec.appendChild(el("div", { cls: "drill-empty", text: "Click a marker tied to a finding to see the recommendation chain." }));
   } else {
+    const verdictColor = finding.type === "IMPROVE" ? "var(--bad)" : finding.type === "SUSTAIN" ? "var(--good)" : "var(--fg-mute)";
+    const verdictLine = el("div");
+    verdictLine.style.cssText = "font-size:11px;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;";
+    verdictLine.appendChild(el("strong", {
+      attrs: { style: `color:${verdictColor};` },
+      text: finding.type === "IMPROVE"
+        ? "Improve · doctrinal gap, corrective action below"
+        : finding.type === "SUSTAIN"
+        ? "Sustain · practice held, preserve and replicate"
+        : "Observation · no doctrinal verdict",
+    }));
+    rec.appendChild(verdictLine);
+
     if (finding.what_actual) {
       rec.appendChild(el("div", null, el("strong", { text: "What actually happened: " }), document.createTextNode(finding.what_actual)));
     }
@@ -1081,9 +1144,10 @@ function openDrill({ entryIndexes, finding }) {
       rec.appendChild(el("div", null, el("strong", { text: "Why: " }), document.createTextNode(finding.why)));
     }
     if (finding.what_to_do) {
-      rec.appendChild(el("div", null, el("strong", { text: "What to do: " }), document.createTextNode(finding.what_to_do)));
+      const label = finding.type === "IMPROVE" ? "Improve action: " : "Action: ";
+      rec.appendChild(el("div", null, el("strong", { text: label }), document.createTextNode(finding.what_to_do)));
     } else if (finding.type === "SUSTAIN") {
-      rec.appendChild(el("div", { cls: "drill-section-meta", text: "SUSTAIN findings carry no corrective action by doctrine — preserve and replicate." }));
+      rec.appendChild(el("div", { cls: "drill-section-meta", text: "Sustain findings carry no corrective action by doctrine — the practice is endorsed for replication in subsequent iterations." }));
     }
   }
 
@@ -1266,10 +1330,12 @@ function renderEval(analysis) {
     el("div", { cls: ev.recovered === ev.total ? "num good" : "num", text: `${ev.recovered} / ${ev.total}` }),
     el("div", { cls: "lbl", text: "CSIS findings recovered" }),
   ));
-  summary.appendChild(el("div", { cls: "eval-stat" },
+  const novelStat = el("div", { cls: "eval-stat" },
     el("div", { cls: "num", text: String((ev.novel_finding_ids || []).length) }),
     el("div", { cls: "lbl", text: "Novel findings" }),
-  ));
+  );
+  novelStat.title = "Flagged for human review — not validated against the published analysis.";
+  summary.appendChild(novelStat);
   const missed = ev.total - ev.recovered;
   summary.appendChild(el("div", { cls: "eval-stat" },
     el("div", { cls: missed > 0 ? "num bad" : "num good", text: String(missed) }),
@@ -1313,7 +1379,12 @@ function renderEval(analysis) {
   if ((ev.novel_finding_ids || []).length) {
     const nov = el("div", { cls: "eval-novel" });
     nov.appendChild(el("div", { cls: "heading", text: "Findings not in CSIS published set" }));
+    nov.appendChild(el("div", {
+      cls: "legend",
+      text: "Flagged for human review — not validated against published analysis. Treat as candidate observations, not endorsed conclusions.",
+    }));
     const wrap = el("div");
+    wrap.style.marginTop = "8px";
     for (const fid of ev.novel_finding_ids) {
       const f = findingsById[fid];
       const pill = el("span", { cls: "matched-id", text: f ? `${fid} · ${f.title}` : fid });
@@ -1450,6 +1521,35 @@ function resetAnalysisUI() {
   const tbtn = document.getElementById("toggle-transcript");
   if (tbtn) tbtn.disabled = true;
 }
+
+// Reference Library — list the source doctrine PDFs and link out to them.
+async function openLibrary() {
+  const r = await fetch("/api/doctrine");
+  const docs = await r.json();
+  const bg = document.getElementById("modal-bg");
+  const title = document.getElementById("modal-title");
+  const meta = document.getElementById("modal-meta");
+  const txt = document.getElementById("modal-text");
+  title.textContent = "Reference Library";
+  meta.textContent = `${docs.length} doctrine document(s) · click to open in a new tab`;
+  clear(txt);
+  const list = el("div", { cls: "lib-list" });
+  for (const d of docs) {
+    const sizeKb = (d.size_bytes / 1024).toFixed(0);
+    const row = el("a", {
+      cls: "lib-row",
+      attrs: { href: d.url, target: "_blank", rel: "noopener" },
+    });
+    row.appendChild(el("span", { cls: "type", text: d.doc_type }));
+    row.appendChild(el("span", { cls: "title", text: d.title }));
+    row.appendChild(el("span", { cls: "size", text: `${sizeKb} KB` }));
+    row.appendChild(el("span", { cls: "arrow", text: "↗" }));
+    list.appendChild(row);
+  }
+  txt.appendChild(list);
+  bg.classList.add("open");
+}
+document.getElementById("open-library").addEventListener("click", openLibrary);
 
 setupTabs();
 loadHealth();
