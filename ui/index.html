@@ -210,6 +210,51 @@
   .finding-anchor { cursor: pointer; padding: 2px 4px; margin: -2px -4px; border-radius: 2px; transition: background 80ms; }
   .finding-anchor:hover { background: rgba(213,159,58,0.08); outline: 1px solid var(--accent-dim); }
 
+  /* ====== Iteration Summary card (top of AAR) ====== */
+  .iter-summary {
+    background: linear-gradient(180deg, rgba(213,159,58,0.06), rgba(213,159,58,0.02));
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--accent);
+    padding: 16px 20px 14px;
+    margin: 0 0 22px;
+  }
+  .iter-summary .head {
+    color: var(--accent); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    margin-bottom: 10px;
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .iter-summary .head .sub { color: var(--fg-mute); font-size: 10.5px; letter-spacing: 0.05em; text-transform: none; font-weight: 400; }
+  .iter-summary section { margin-bottom: 12px; }
+  .iter-summary section:last-child { margin-bottom: 0; }
+  .iter-summary .sec-label {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--fg-dim); margin-bottom: 4px;
+  }
+  .iter-summary .outcome { color: var(--fg); font-size: 13px; line-height: 1.55; }
+  .iter-summary ul.tensions { list-style: none; padding: 0; margin: 4px 0 0; }
+  .iter-summary ul.tensions li {
+    color: var(--fg); font-size: 12px; line-height: 1.5;
+    padding: 5px 0; border-top: 1px dashed var(--rule);
+  }
+  .iter-summary ul.tensions li:first-child { border-top: none; }
+  .iter-summary ul.tensions li .tcite {
+    display: inline-block; margin-left: 6px; padding: 1px 6px;
+    font-size: 10.5px; color: var(--accent);
+    border: 1px solid var(--accent-dim); cursor: pointer;
+  }
+  .iter-summary ul.tensions li .tcite:hover { background: rgba(213,159,58,0.08); border-color: var(--accent); }
+  .iter-summary .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px 18px; padding-top: 8px; border-top: 1px solid var(--rule);
+  }
+  .iter-summary .stats .stat { display: flex; align-items: baseline; gap: 6px; }
+  .iter-summary .stats .num { color: var(--accent); font-size: 16px; font-weight: 600; min-width: 24px; }
+  .iter-summary .stats .num.bad { color: var(--bad); }
+  .iter-summary .stats .num.good { color: var(--good); }
+  .iter-summary .stats .lbl { color: var(--fg-dim); font-size: 11px; }
+  .iter-summary .stats .lbl em { color: var(--fg-mute); font-style: normal; font-size: 10.5px; }
+
   /* ====== Status panel ====== */
   .analysis-status { color: var(--fg-mute); font-size: 11px; margin-top: 8px; }
   .analysis-status.working { color: var(--accent); }
@@ -572,11 +617,15 @@ async function loadDemos() {
       el("div", { cls: "meta", text: `${d.n_entries} entries · ${d.source || "n/a"}` }),
     );
     row.addEventListener("click", () => {
+      const wasSameDemo = selectedDemo === d.id;
       document.querySelectorAll(".demo-row").forEach(x => x.classList.remove("active"));
       row.classList.add("active");
       selectedDemo = d.id;
       document.getElementById("generate").disabled = false;
       document.getElementById("replay").disabled = !demoCacheStatus[d.id];
+      // Different demo selected → wipe the right-side surface so stale AAR /
+      // analysis from the previous demo can't be read against the new one.
+      if (!wasSameDemo) clearRightPane();
     });
     cont.appendChild(row);
     if (i === 0) row.click();
@@ -871,6 +920,7 @@ async function runAnalysis() {
     for (const f of data.findings || []) findingsById[f.id] = f;
     timelineMarkersByEntry = {};
     for (const m of data.timeline || []) timelineMarkersByEntry[m.entry_index] = m;
+    renderIterationSummary(data);
     renderTimeline(data);
     renderEval(data);
     renderGaps(data);
@@ -889,6 +939,90 @@ async function runAnalysis() {
       status.textContent = "Analysis failed (see console).";
       status.className = "analysis-status error";
     }
+  }
+}
+
+// ============= Iteration Summary card =============
+
+function renderIterationSummary(analysis) {
+  const aarRoot = document.querySelector(".aar");
+  if (!aarRoot) return;
+  // Remove a previously-inserted summary card so re-runs replace cleanly.
+  const existing = aarRoot.querySelector(".iter-summary");
+  if (existing) existing.remove();
+
+  const s = (analysis.summary) || {};
+  const stats = s.stats || {};
+  const hasContent = (s.campaign_outcome || "").trim() || (s.key_tensions || []).length || stats.findings_total;
+  if (!hasContent) return;
+
+  const card = el("div", { cls: "iter-summary" });
+
+  const head = el("div", { cls: "head" });
+  head.appendChild(document.createTextNode("Iteration Summary"));
+  head.appendChild(el("span", { cls: "sub", text: "doctrinal snapshot — about the iteration, not the participants" }));
+  card.appendChild(head);
+
+  // Campaign outcome
+  if ((s.campaign_outcome || "").trim()) {
+    const sec = el("section");
+    sec.appendChild(el("div", { cls: "sec-label", text: "Campaign outcome" }));
+    sec.appendChild(el("div", { cls: "outcome", text: s.campaign_outcome }));
+    card.appendChild(sec);
+  }
+
+  // Key tensions
+  if ((s.key_tensions || []).length) {
+    const sec = el("section");
+    sec.appendChild(el("div", { cls: "sec-label", text: "Key tensions surfaced" }));
+    const ul = el("ul", { cls: "tensions" });
+    for (const t of s.key_tensions) {
+      const li = el("li");
+      li.appendChild(document.createTextNode(t.text));
+      for (const cid of t.citation_chunk_ids || []) {
+        const pill = el("span", { cls: "tcite", text: cidToShortLabel(cid) });
+        pill.title = cid;
+        pill.addEventListener("click", () => openCitation(cid));
+        li.appendChild(pill);
+      }
+      ul.appendChild(li);
+    }
+    sec.appendChild(ul);
+    card.appendChild(sec);
+  }
+
+  // Quick stats
+  if (stats.findings_total !== undefined) {
+    const sec = el("section");
+    sec.appendChild(el("div", { cls: "sec-label", text: "Quick stats · about the AAR's output, not participant performance" }));
+    const grid = el("div", { cls: "stats" });
+
+    function stat(num, label, kind) {
+      const row = el("div", { cls: "stat" });
+      const n = el("span", { cls: `num${kind ? " " + kind : ""}`, text: String(num) });
+      row.appendChild(n);
+      row.appendChild(el("span", { cls: "lbl", text: label }));
+      grid.appendChild(row);
+    }
+
+    const sustain = stats.sustain || 0;
+    const improve = stats.improve || 0;
+    stat(stats.findings_total, `findings · ${sustain} SUSTAIN, ${improve} IMPROVE`);
+    stat(stats.citations_resolved || 0, `citations resolved · ${stats.unique_chunks_cited || 0} unique chunks`);
+    stat((stats.doctrine_sources || []).length, "doctrine sources referenced");
+    stat(stats.contradictions || 0, "contradictions flagged", (stats.contradictions || 0) > 0 ? "bad" : "");
+    stat(stats.silences || 0, "silences flagged", (stats.silences || 0) > 0 ? "bad" : "");
+
+    sec.appendChild(grid);
+    card.appendChild(sec);
+  }
+
+  // Insert after the H1 and before the first section block.
+  const h1 = aarRoot.querySelector("h1");
+  if (h1 && h1.nextSibling) {
+    aarRoot.insertBefore(card, h1.nextSibling);
+  } else {
+    aarRoot.appendChild(card);
   }
 }
 
@@ -1498,6 +1632,24 @@ document.getElementById("generate").removeEventListener("click", startGenerate);
 document.getElementById("replay").removeEventListener("click", startReplay);
 document.getElementById("generate").addEventListener("click", () => window.streamFromEndpoint("/api/generate", "Generating fresh…"));
 document.getElementById("replay").addEventListener("click", () => window.streamFromEndpoint("/api/replay", "Replaying saved…"));
+
+function clearRightPane() {
+  // Reset the AAR text area back to its placeholder.
+  const out = document.getElementById("output");
+  if (out) {
+    clear(out);
+    const ph = el("div", { cls: "placeholder" });
+    ph.appendChild(document.createTextNode("Pick "));
+    ph.appendChild(document.createTextNode("Generate Fresh"));
+    ph.appendChild(document.createTextNode(" or "));
+    ph.appendChild(document.createTextNode("Replay Saved"));
+    ph.appendChild(document.createTextNode(" to load this demo's AAR."));
+    out.appendChild(ph);
+  }
+  // Drop all derived analysis surfaces (timeline / eval / gaps / transcript /
+  // tab badges / split-mode toggle).
+  resetAnalysisUI();
+}
 
 function resetAnalysisUI() {
   lastAnalysis = null;

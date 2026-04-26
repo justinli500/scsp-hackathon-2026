@@ -100,6 +100,19 @@ class GapReport:
 
 
 @dataclass
+class IterationTension:
+    text: str
+    citation_chunk_ids: list[str] = field(default_factory=list)
+
+
+@dataclass
+class IterationSummary:
+    campaign_outcome: str = ""
+    key_tensions: list[IterationTension] = field(default_factory=list)
+    stats: dict = field(default_factory=dict)
+
+
+@dataclass
 class AnalysisResult:
     demo_id: str
     transcript_entries: list[dict] = field(default_factory=list)
@@ -107,6 +120,7 @@ class AnalysisResult:
     timeline: list[TimelineMarker] = field(default_factory=list)
     eval: EvalReport = field(default_factory=lambda: EvalReport(available=False))
     gaps: GapReport = field(default_factory=GapReport)
+    summary: IterationSummary = field(default_factory=IterationSummary)
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -124,6 +138,11 @@ class AnalysisResult:
             "gaps": {
                 "contradictions": [asdict(g) for g in self.gaps.contradictions],
                 "silences": [asdict(g) for g in self.gaps.silences],
+            },
+            "summary": {
+                "campaign_outcome": self.summary.campaign_outcome,
+                "key_tensions": [asdict(t) for t in self.summary.key_tensions],
+                "stats": self.summary.stats,
             },
         }
 
@@ -634,6 +653,99 @@ def _find_doctrine_gaps(findings: list[Finding]) -> GapReport:
 
 
 # ---------------------------------------------------------------------------
+# Step 6: iteration summary card (campaign outcome + key tensions + stats)
+# ---------------------------------------------------------------------------
+
+
+_SUMMARY_SYSTEM = (
+    "You are a doctrinal analyst writing a one-paragraph snapshot for the top "
+    "of an after-action review. Be precise and factual; describe the iteration "
+    "outcome, not participant performance. Output JSON only."
+)
+
+
+def _build_iteration_summary(
+    section_markdown: dict[str, str],
+    findings: list[Finding],
+    gap_report: GapReport,
+) -> IterationSummary:
+    """LLM pass for outcome + tensions, deterministic computation for stats."""
+    # ---------- deterministic stats ----------
+    sustain = sum(1 for f in findings if f.type == "SUSTAIN")
+    improve = sum(1 for f in findings if f.type == "IMPROVE")
+    observation = sum(1 for f in findings if f.type == "OBSERVATION")
+    # Tally every citation across every section, not just findings, so the
+    # number reflects the AAR as a whole.
+    all_chunk_ids: list[str] = []
+    for md in section_markdown.values():
+        for cid in _extract_chunk_ids(md):
+            all_chunk_ids.append(cid)
+    citations_resolved = len(all_chunk_ids)
+    unique_chunks = len(set(all_chunk_ids))
+    doctrine_sources = sorted({cid.split(":", 1)[0] for cid in all_chunk_ids})
+    stats = {
+        "findings_total": len(findings),
+        "sustain": sustain,
+        "improve": improve,
+        "observation": observation,
+        "citations_resolved": citations_resolved,
+        "unique_chunks_cited": unique_chunks,
+        "doctrine_sources": doctrine_sources,
+        "contradictions": len(gap_report.contradictions),
+        "silences": len(gap_report.silences),
+    }
+
+    # ---------- LLM pass for outcome + tensions ----------
+    findings_block = "\n".join(
+        f"{f.id} [{f.type}] {f.title} | cites: {','.join(f.citation_chunk_ids) or 'none'} | "
+        f"{(f.what_actual or f.why or '')[:280]}"
+        for f in findings
+    )
+    closing_md = section_markdown.get("closing", "") or section_markdown.get("what_happened", "")
+    context = closing_md[:2500]
+
+    user = (
+        "AAR CLOSING / NARRATIVE EXCERPT:\n"
+        f"{context}\n\n"
+        "STRUCTURED FINDINGS:\n"
+        f"{findings_block}\n\n"
+        "Produce a snapshot of the iteration:\n"
+        "1. campaign_outcome — ONE factual sentence (≤30 words) describing "
+        "the iteration's operational outcome (not participant performance).\n"
+        "2. key_tensions — 2–3 SHORT doctrinal-tension bullets (≤25 words each, "
+        "phrased as a trade-off, e.g. 'distributed maritime operations vs. "
+        "concentration of fires'). For each tension, attach 1–2 chunk_ids "
+        "FROM THE 'cites:' lists in the findings block above — pick the most "
+        "relevant doctrinal anchors. Do not invent chunk_ids.\n\n"
+        'Return JSON: {"campaign_outcome": "...", '
+        '"key_tensions": [{"text": "...", "citation_chunk_ids": ["..."]}]}.'
+    )
+    parsed = _llm_json(_SUMMARY_SYSTEM, user)
+    outcome = ""
+    tensions: list[IterationTension] = []
+    if isinstance(parsed, dict):
+        outcome = (parsed.get("campaign_outcome") or "").strip()
+        valid_chunks = {cid for f in findings for cid in f.citation_chunk_ids}
+        for t in parsed.get("key_tensions", []) or []:
+            if not isinstance(t, dict):
+                continue
+            text = (t.get("text") or "").strip()
+            if not text:
+                continue
+            cite_ids = [c for c in t.get("citation_chunk_ids", []) if isinstance(c, str)]
+            # Only retain chunk ids that actually appear somewhere in the AAR;
+            # the LLM occasionally re-states an id that was never cited.
+            cite_ids = [c for c in cite_ids if c in valid_chunks]
+            tensions.append(IterationTension(text=text, citation_chunk_ids=cite_ids[:2]))
+
+    return IterationSummary(
+        campaign_outcome=outcome,
+        key_tensions=tensions[:3],
+        stats=stats,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Top-level orchestration
 # ---------------------------------------------------------------------------
 
@@ -692,6 +804,21 @@ def analyze(
     else:
         gap_report = GapReport()
 
+    try:
+        summary = _build_iteration_summary(section_markdown, findings, gap_report)
+    except Exception:
+        summary = IterationSummary(stats={
+            "findings_total": len(findings),
+            "sustain": sum(1 for f in findings if f.type == "SUSTAIN"),
+            "improve": sum(1 for f in findings if f.type == "IMPROVE"),
+            "observation": sum(1 for f in findings if f.type == "OBSERVATION"),
+            "citations_resolved": 0,
+            "unique_chunks_cited": 0,
+            "doctrine_sources": [],
+            "contradictions": len(gap_report.contradictions),
+            "silences": len(gap_report.silences),
+        })
+
     return AnalysisResult(
         demo_id=demo_id,
         transcript_entries=[
@@ -702,4 +829,5 @@ def analyze(
         timeline=timeline,
         eval=eval_report,
         gaps=gap_report,
+        summary=summary,
     )
