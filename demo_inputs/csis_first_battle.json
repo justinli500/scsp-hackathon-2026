@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "title": "Taiwan Strait Wargame — Base Case (Iteration B-3)",
+    "scenario": "PRC initiates a cross-strait amphibious invasion of Taiwan in early 2026. The United States, Japan, and Taiwan respond. Synthesized from the Base Case scenario described in Cancian, Cancian, and Heginbotham, 'The First Battle of the Next War,' CSIS, January 2023, pp. 85–101.",
+    "objectives": [
+      "Defeat or substantially degrade the PRC amphibious lift before it can establish a beachhead.",
+      "Preserve enough US/JSDF combat power to re-attack and impose unacceptable costs on subsequent waves.",
+      "Avoid loss of more than two carrier strike groups in the first 21 days.",
+      "Maintain regional alliance cohesion (Japan, AUS, possibly Philippines)."
+    ],
+    "source": "CSIS, 'The First Battle of the Next War' (Jan 2023), Base Case scenario.",
+    "force_lay": "Blue: 2 USN CVNs forward, 24 SSNs available, USAF F-35As/F-15EXs at Kadena/Yokota/Misawa, USMC F-35Bs at Iwakuni; JASDF F-35As; Taiwan ground forces, ROCN. Red: PLA Eastern Theater Command — full amphibious group, ~25,000 first-wave landing force, PLAAF strike packages, PLARF DF-17/DF-21D/DF-26."
+  },
+  "entries": [
+    {
+      "name": "Narrator",
+      "text": "T+0. Open hostilities at first light, local. Beijing has issued no formal declaration; the campaign opens with simultaneous strikes. Weather: marginal seas in the strait, good visibility. The PLA leadership has accepted the operational risk that surprise will be partial — most blue forces went to a higher alert posture 96 hours prior on indicators."
+    },
+    {
+      "name": "Red Cell (PRC Eastern Theater)",
+      "text": "Opening volley. PLARF launches a coordinated salvo — DF-17 hypersonic glide vehicles against Kadena and Yokota runways and aircraft shelters; DF-21D and DF-26 anti-ship ballistic missiles against the two forward US carriers; DF-15B and CJ-10 against Taiwanese command nodes. Concurrently, PLAAF launches H-6 strike packages with YJ-12 anti-ship cruise missiles. Cyber action initiates: targeted disruption of Taiwanese power grid in Taipei and Kaohsiung. Amphibious group sorties from Fujian, screened by surface action groups."
+    },
+    {
+      "name": "Adjudicator",
+      "text": "Day 1 outcomes (resolved): One US CVN suffers a mission kill from a DF-21D hit forward of the island; flight ops cease. The second CVN is damaged but recoverable. Kadena loses ~40% of parked aircraft; hardened-shelter survival is consistent with the project's base case Pk distributions. Taiwanese C2 partially degraded; civilian power outages in Taipei resolve within 18 hours. PLAAF strike package losses to F-35 CAP and Patriot/THAAD: moderate; one H-6 squadron effectively destroyed."
+    },
+    {
+      "name": "Blue Cell (USINDOPACOM JTF)",
+      "text": "Counter-strike commences. USAF and USN launch a high-volume salvo of LRASM and JASSM-ER from B-1Bs and B-52Hs operating from Guam and CONUS, mixed to overwhelm Chinese ship defenses. USMC F-35Bs from Iwakuni execute strikes on amphibious shipping in the strait. SSNs are released into the Taiwan Strait choke points with weapons-free authority against PLAN amphibs and surface combatants. Taiwan ground forces transition to coastal defense posture, with HIMARS-launched anti-ship munitions targeting the inbound amphibious force."
+    },
+    {
+      "name": "Adjudicator",
+      "text": "Days 2–4. The combined LRASM/JASSM-ER salvo achieves higher than expected hits because PLAN interceptor inventory is exhausted in successive engagements. SSN attacks against PLAN amphibs are decisive: the project's base case attrition rates against amphibious lift hold (per CSIS p. 99–100, 'On average, the PLA was able to land...'). Of the planned first-wave amphibious force, less than 40% reaches the beachhead. Taiwan Marines and reserves contain the lodgment to two narrow beach segments north of Taoyuan."
+    },
+    {
+      "name": "Red Cell (PRC Eastern Theater)",
+      "text": "Reassessment. With first-wave lift losses, the PRC commander faces a choice: commit second-wave shipping (mostly civilian RoRo lift hastily impressed) under degraded screen, or pause and attempt to establish air superiority first. The decision is to commit. Civilian lift is mobilized; PLAAF reallocates to aggressive counter-air operations against Kadena, Andersen, and JASDF bases. PLA cyber forces escalate: attempt to degrade the JLENS / IBCS picture and disrupt LRASM mid-course updates."
+    },
+    {
+      "name": "Blue Cell (USINDOPACOM JTF)",
+      "text": "Sustainment crisis emerging. LRASM expenditure at Day 4 has consumed approximately one-third of pre-war inventory; in the Pacific theater, JASSM-ER stockpile draw rates are exceeding production by an order of magnitude. Request to NCA: authorization to draw from European-theater stocks. F-35Bs reposition to dispersed civilian airfields per pre-arranged Japan agreements (excursion case). Submarine torpedo loadout becomes the limiting factor for the SSN fleet."
+    },
+    {
+      "name": "Adjudicator",
+      "text": "Days 5–14. Civilian-lift second wave suffers catastrophic losses to SSN action and surviving anti-ship aviation; only fragments reach the beachhead. The lodgment is contained but not collapsed. Both sides experience munitions exhaustion on premier weapons. Cyber effects on both sides are 'significant but not magical' — net operational impact is bounded."
+    },
+    {
+      "name": "Japan (JSDF Joint Staff)",
+      "text": "JSDF F-2/F-15J and JASDF F-35As have flown sustained sorties against the surface action groups; Type 12 SSM batteries on Okinawa and the Sakishima chain are engaged. Civilian airport access (excursion case) materially reduced ground-attrition losses. Japanese government has formally invoked Article 5 with the United States and authorized full operational employment of JSDF assets. Casualties are heavier than the public has been prepared for."
+    },
+    {
+      "name": "Taiwan (MND J-3)",
+      "text": "The lodgment is contained. ROC Army reserves are deploying into blocking positions; HIMARS units have been redeployed inland to escape PLA counter-battery. Civilian morale is holding in major cities despite continued PLARF strikes against logistics nodes. Power grid is mostly restored on emergency generation; LNG imports are halted and natural-gas reserves are being depleted at a rate that will become critical at approximately Day 30."
+    },
+    {
+      "name": "Adjudicator",
+      "text": "End-state at Day 21. The PLA cannot sustain the lodgment; second-wave reinforcement options are exhausted; the PLA Central Military Commission accepts a ceasefire framework. Coalition victory is judged. Coalition losses are severe: 2 USN CVNs damaged or sunk, ~270 USN tactical aircraft, ~382 total fixed-wing combat losses, approximately 3,000 US KIA. Taiwan: roughly 3,500 ROCAF/ROCA KIA. PLA: amphibious force largely destroyed; ~10,000+ KIA. Munitions stocks of LRASM, JASSM-ER, SM-6, and Mk-48 ADCAP across the joint force are at or below 15% of pre-war inventory."
+    },
+    {
+      "name": "Narrator",
+      "text": "Adjournment. The wargame closes with the combatants in a state of 'pyrrhic stalemate-trending-victory': Taiwan retains autonomy; the United States and Japan have absorbed casualties at a scale unseen since Korea. The defense-industrial base is the binding constraint on follow-on operations. Munitions pipelines that would take 3+ years to refill are now empty. Force-readiness assumptions for any other theater are invalidated for the foreseeable future."
+    }
+  ]
+}

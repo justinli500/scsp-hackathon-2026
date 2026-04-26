@@ -1,0 +1,13 @@
+SECTION: Orientation
+
+You are drafting Section 3 of the AAR: "Orientation."
+
+Goal:
+  Briefly orient the reader to the scenario, force laydown, and operating environment. This is the "where, when, with what" frame for the Summary that follows.
+
+Constraints:
+  - Use the scenario and force_lay fields from the transcript meta. Add brief operational context (theater, time horizon, key adversary capabilities) only as far as the transcript supports.
+  - Do NOT narrate the events; that's Section 4.
+  - Cite the AAR Leader's Guide once for the structural role of Orientation in a formal AAR.
+
+Output format: Markdown. Begin with `## 3. Orientation`. Keep it under 200 words.

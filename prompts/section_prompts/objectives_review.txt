@@ -1,0 +1,14 @@
+SECTION: Review of Objectives
+
+You are drafting Section 2 of the AAR: "Review of Objectives."
+
+Goal:
+  Restate, in formal language, the operational objectives the participants were measured against in this iteration. This is the "what was supposed to happen" anchor that the rest of the AAR will refer back to.
+
+Constraints:
+  - Pull objectives directly from the transcript meta block. Do not invent objectives.
+  - For each objective, briefly map it to the doctrinal language it derives from where applicable (e.g., "preservation of combat power" → JP 3-0 Joint Functions).
+  - Cite the AAR Leader's Guide for the practice of reviewing objectives at the start of an AAR.
+  - Bulleted list is acceptable. Keep each entry to one or two lines.
+
+Output format: Markdown. Begin with `## 2. Review of Objectives`.

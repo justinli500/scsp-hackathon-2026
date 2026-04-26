@@ -1,0 +1,21 @@
+SECTION: Lessons Identified (Final Pass)
+
+You are producing the final "Lessons Identified" list — terminology adopted from NATO and the Joint Lessons Learned Information System (JLLIS). This is NOT "Lessons Learned"; that designation is reserved for observations that have driven institutional change after closure of the loop. At AAR time, every entry below is a Lesson Identified.
+
+Goal:
+  Distill the AAR into a numbered list of 5–10 Lessons Identified that an institution (a doctrine cell, a force planner, a budget shop) could act on. Each entry is one sentence stating the lesson, plus a one-line doctrinal anchor.
+
+Required structure:
+
+  1. **<Lesson statement, declarative, action-orientable>**
+     [Title, p. N]{{cite:CHUNK_ID}}
+
+  2. ...
+
+Constraints:
+  - Each lesson is institutional, not tactical. ("Pre-position long-range strike munitions in theater at quantities sustaining 14 days of high-intensity employment" is institutional. "Pilots should fly higher" is not.)
+  - Cite the doctrinal source for each lesson via the {{cite:CHUNK_ID}} tag. Do not invent.
+  - Lessons should be derivable from the transcript and the prior AAR sections, not new observations.
+  - Use the Observation → Lesson Identified → Lesson Learned pipeline framing if any single lesson naturally fits it.
+
+Output format: Markdown. Begin with `## Lessons Identified`. No closing paragraph.

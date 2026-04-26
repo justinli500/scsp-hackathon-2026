@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Doctrinal AAR Generator</title>
+<style>
+  :root {
+    --bg: #0c0e10;
+    --bg-2: #131619;
+    --bg-3: #1a1d22;
+    --fg: #d6dadf;
+    --fg-dim: #8b939c;
+    --fg-mute: #5b636c;
+    --accent: #d59f3a;
+    --accent-dim: #6b5023;
+    --rule: #21252b;
+    --good: #6fa86b;
+    --bad: #c97070;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Menlo", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: var(--mono); font-size: 13.5px; line-height: 1.5; }
+  header { border-bottom: 1px solid var(--rule); padding: 10px 18px; display: flex; align-items: baseline; gap: 16px; background: var(--bg-2); position: sticky; top: 0; z-index: 5; }
+  header .brand { font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+  header .sub { color: var(--fg-dim); font-size: 12px; }
+  header .spacer { flex: 1; }
+  header .health { color: var(--fg-mute); font-size: 11.5px; }
+
+  main { display: grid; grid-template-columns: 320px 1fr; min-height: calc(100vh - 44px); }
+
+  aside.controls { border-right: 1px solid var(--rule); padding: 18px; background: var(--bg-2); }
+  aside.controls h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--fg-dim); margin: 0 0 8px; }
+  aside.controls section { margin-bottom: 22px; }
+
+  .demo-row { border: 1px solid var(--rule); background: var(--bg); padding: 10px 12px; margin-bottom: 8px; cursor: pointer; transition: border-color 80ms; }
+  .demo-row:hover { border-color: var(--accent-dim); }
+  .demo-row.active { border-color: var(--accent); }
+  .demo-row .title { color: var(--fg); margin-bottom: 4px; }
+  .demo-row .meta { color: var(--fg-mute); font-size: 11.5px; }
+  .demo-row .cache-tag { display: inline-block; margin-left: 8px; padding: 1px 6px; font-size: 10px; letter-spacing: 0.05em; border: 1px solid var(--accent-dim); color: var(--accent); }
+  .demo-row .cache-tag.empty { border-color: var(--rule); color: var(--fg-mute); }
+
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  button.cta { background: var(--accent); color: #1a120a; border: none; padding: 10px 8px; font-family: var(--mono); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: background 80ms; }
+  button.cta:hover { background: #e2ad4a; }
+  button.cta:disabled { background: var(--fg-mute); color: var(--bg); cursor: not-allowed; }
+  button.cta.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent-dim); }
+  button.cta.secondary:hover { background: rgba(213,159,58,0.08); border-color: var(--accent); }
+  button.cta.secondary:disabled { background: transparent; color: var(--fg-mute); border-color: var(--rule); cursor: not-allowed; }
+
+  section.output { padding: 24px 36px; max-width: 920px; }
+  .placeholder { color: var(--fg-mute); padding-top: 48px; }
+  .placeholder code { background: var(--bg-3); padding: 1px 6px; }
+
+  .aar h1 { font-size: 18px; color: var(--accent); border-bottom: 1px solid var(--rule); padding-bottom: 6px; margin: 0 0 18px; font-weight: 600; }
+  .aar h2 { font-size: 14px; color: var(--fg); margin: 24px 0 8px; font-weight: 600; letter-spacing: 0.04em; }
+  .aar h3 { font-size: 12.5px; color: var(--accent); margin: 16px 0 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .aar p { margin: 8px 0; }
+  .aar ul { padding-left: 20px; margin: 6px 0; }
+  .aar li { margin: 6px 0; }
+  .aar strong { color: var(--fg); }
+
+  .section-block { border-left: 2px solid var(--rule); padding: 10px 16px 10px 14px; margin-bottom: 12px; }
+  .section-block.streaming { border-left-color: var(--accent); }
+  .section-block.done { border-left-color: var(--good); }
+  .section-block.error { border-left-color: var(--bad); }
+  .section-meta { color: var(--fg-mute); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+
+  .citation { color: var(--accent); cursor: pointer; border-bottom: 1px dotted var(--accent-dim); }
+  .citation:hover { border-bottom-color: var(--accent); background: rgba(213,159,58,0.08); }
+
+  .gate-pass { color: var(--good); font-size: 11.5px; margin-top: 6px; }
+  .gate-fail { color: var(--bad); font-size: 11.5px; margin-top: 6px; }
+
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none; align-items: center; justify-content: center; z-index: 50; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--bg-2); border: 1px solid var(--rule); width: min(720px, 90vw); max-height: 80vh; overflow: auto; padding: 18px 22px; }
+  .modal h3 { margin: 0 0 6px; color: var(--accent); font-size: 13px; }
+  .modal .meta { color: var(--fg-mute); font-size: 11.5px; margin-bottom: 12px; }
+  .modal .text { white-space: pre-wrap; color: var(--fg); }
+  .modal .close { float: right; cursor: pointer; color: var(--fg-mute); }
+
+  .legend { color: var(--fg-mute); font-size: 11px; margin-top: 14px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">DOCTRINAL AAR</div>
+  <div class="sub">SCSP Hackathon 2026 · doctrine-grounded after-action reviews</div>
+  <div class="spacer"></div>
+  <div class="health" id="health">…</div>
+</header>
+
+<main>
+  <aside class="controls">
+    <section>
+      <h2>Demo Inputs</h2>
+      <div id="demos"></div>
+    </section>
+    <section>
+      <div class="btn-row">
+        <button class="cta" id="generate" disabled>Generate Fresh</button>
+        <button class="cta secondary" id="replay" disabled>Replay Saved</button>
+      </div>
+      <div class="legend" id="status"></div>
+    </section>
+    <section>
+      <h2>Notes</h2>
+      <div class="legend">
+        Each citation is verified server-side against the doctrine corpus. If
+        any citation fails to resolve, the section is rejected — no fabricated
+        sources reach the page.
+      </div>
+    </section>
+  </aside>
+
+  <section class="output" id="output">
+    <div class="placeholder">
+      Pick a demo input on the left. The AAR will stream in section by section.
+      Click any bracketed citation to see the source doctrine chunk.
+      <br><br>
+      Pipeline check: <code>GET /api/health</code>.
+    </div>
+  </section>
+</main>
+
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <span class="close" id="modal-close">[close]</span>
+    <h3 id="modal-title"></h3>
+    <div class="meta" id="modal-meta"></div>
+    <div class="text" id="modal-text"></div>
+  </div>
+</div>
+
+<script>
+// =============================================================
+// DOM-only construction. No innerHTML. All text goes through
+// textContent or createTextNode, so LLM output cannot inject
+// markup — even via crafted citation labels or section content.
+// =============================================================
+
+const SECTION_LABELS = {
+  intro_rules: "1. Introduction & Rules",
+  objectives_review: "2. Review of Objectives",
+  orientation: "3. Orientation",
+  what_happened: "4. Summary of Recent Events",
+  key_issues: "5. Discussion of Key Issues",
+  force_protection: "6. Force Protection / Optional Issues",
+  closing: "7. Closing Comments",
+  lessons_identified: "Lessons Identified",
+};
+
+let selectedDemo = null;
+let inFlight = false;
+
+function el(tag, opts, ...children) {
+  opts = opts || {};
+  const e = document.createElement(tag);
+  if (opts.cls) e.className = opts.cls;
+  if (opts.text != null) e.textContent = opts.text;
+  if (opts.attrs) for (const [k, v] of Object.entries(opts.attrs)) e.setAttribute(k, v);
+  if (opts.on) for (const [k, v] of Object.entries(opts.on)) e.addEventListener(k, v);
+  for (const c of children) {
+    if (c == null) continue;
+    e.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  }
+  return e;
+}
+
+function clear(node) {
+  while (node.firstChild) node.removeChild(node.firstChild);
+}
+
+// Returns true if the viewport is currently scrolled to within ~80px of the
+// page bottom. Used to drive tail-mode auto-scroll: follow new content only
+// when the reader has not deliberately scrolled up.
+function isNearBottom(threshold = 80) {
+  const scrolled = window.scrollY + window.innerHeight;
+  const total = document.documentElement.scrollHeight;
+  return total - scrolled <= threshold;
+}
+
+async function loadHealth() {
+  const r = await fetch("/api/health");
+  const j = await r.json();
+  const target = document.getElementById("health");
+  const keyOk = j.anthropic_key_set;
+  const corpusN = (j.doctrine_chunk_files || []).length;
+  target.textContent = `corpus: ${corpusN} doc(s) · ANTHROPIC_API_KEY: ${keyOk ? "set" : "MISSING"}`;
+  target.style.color = keyOk ? "var(--fg-mute)" : "var(--bad)";
+}
+
+let demoCacheStatus = {}; // demo_id -> bool
+
+async function loadDemos() {
+  const r = await fetch("/api/demos");
+  const demos = await r.json();
+  const cont = document.getElementById("demos");
+  clear(cont);
+  demoCacheStatus = {};
+  demos.forEach((d, i) => {
+    demoCacheStatus[d.id] = !!d.cache;
+    const titleRow = el("div", { cls: "title", text: d.title });
+    const cacheTag = el("span", {
+      cls: d.cache ? "cache-tag" : "cache-tag empty",
+      text: d.cache ? "saved" : "unsaved",
+    });
+    titleRow.appendChild(cacheTag);
+    const row = el("div", { cls: "demo-row", attrs: { "data-id": d.id } },
+      titleRow,
+      el("div", { cls: "meta", text: `${d.n_entries} entries · ${d.source || "n/a"}` }),
+    );
+    row.addEventListener("click", () => {
+      document.querySelectorAll(".demo-row").forEach(x => x.classList.remove("active"));
+      row.classList.add("active");
+      selectedDemo = d.id;
+      document.getElementById("generate").disabled = false;
+      document.getElementById("replay").disabled = !demoCacheStatus[d.id];
+    });
+    cont.appendChild(row);
+    if (i === 0) row.click();
+  });
+}
+
+// ============= Markdown -> DOM =============
+// Line-based renderer. Builds DOM nodes directly using createElement and
+// createTextNode only. No innerHTML, no string templates with user data.
+
+const CITE_FULL = /\[([^\]]+)\]\{\{\s*cite:([^}]+?)\s*\}\s*\}/g;
+const CITE_BARE = /\{\{\s*cite:([^}]+?)\s*\}\s*\}/g;
+
+function inlineToFragment(text) {
+  // First pass: handle full citations [label]{{cite:CHUNK_ID}} via matchAll.
+  // Bold and bare {{cite:...}} are handled inside the slices between matches.
+  const frag = document.createDocumentFragment();
+  let cursor = 0;
+  for (const m of text.matchAll(CITE_FULL)) {
+    if (m.index > cursor) appendInlineNonCitation(frag, text.slice(cursor, m.index));
+    const cid = m[2];
+    const span = el("span", { cls: "citation", attrs: { "data-cid": cid }, text: `[${m[1]}]` });
+    span.addEventListener("click", () => openCitation(cid));
+    frag.appendChild(span);
+    cursor = m.index + m[0].length;
+  }
+  if (cursor < text.length) appendInlineNonCitation(frag, text.slice(cursor));
+  return frag;
+}
+
+function appendInlineNonCitation(parent, text) {
+  // Handle bare {{cite:...}} and bold within a slice that has no full citations.
+  let cursor = 0;
+  for (const m of text.matchAll(CITE_BARE)) {
+    if (m.index > cursor) appendBold(parent, text.slice(cursor, m.index));
+    const cid = m[1];
+    const span = el("span", { cls: "citation", attrs: { "data-cid": cid }, text: "[ref]" });
+    span.addEventListener("click", () => openCitation(cid));
+    parent.appendChild(span);
+    cursor = m.index + m[0].length;
+  }
+  if (cursor < text.length) appendBold(parent, text.slice(cursor));
+}
+
+function appendBold(parent, text) {
+  // Split on **...**; non-bold becomes text nodes, bold becomes <strong>.
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  for (const p of parts) {
+    if (!p) continue;
+    if (p.startsWith("**") && p.endsWith("**") && p.length > 4) {
+      parent.appendChild(el("strong", { text: p.slice(2, -2) }));
+    } else {
+      parent.appendChild(document.createTextNode(p));
+    }
+  }
+}
+
+function renderMarkdownInto(target, md) {
+  clear(target);
+  const lines = md.split("\n");
+  let listEl = null;
+  let listIndent = -1;
+  // Skip the first H2 produced by the LLM — the section's meta label above
+  // the body already displays the section title, and the model is instructed
+  // to produce a leading H2 anyway. Showing both reads as a duplicated header.
+  let h2HeaderSkipped = false;
+
+  const closeList = () => { listEl = null; listIndent = -1; };
+
+  for (const line of lines) {
+    const headerMatch = line.match(/^(#{1,3}) (.*)$/);
+    const bulletMatch = line.match(/^( *)- (.+)$/);
+
+    if (headerMatch) {
+      closeList();
+      const level = headerMatch[1].length;
+      if (level === 2 && !h2HeaderSkipped) {
+        h2HeaderSkipped = true;
+        continue;
+      }
+      const h = el(`h${level}`);
+      h.appendChild(inlineToFragment(headerMatch[2]));
+      target.appendChild(h);
+    } else if (bulletMatch) {
+      const indent = bulletMatch[1].length;
+      const content = bulletMatch[2];
+      if (!listEl || indent !== listIndent) {
+        closeList();
+        listEl = el("ul");
+        listIndent = indent;
+        target.appendChild(listEl);
+      }
+      const li = el("li");
+      li.appendChild(inlineToFragment(content));
+      listEl.appendChild(li);
+    } else if (line.trim() === "") {
+      closeList();
+    } else {
+      closeList();
+      const p = el("p");
+      p.appendChild(inlineToFragment(line));
+      target.appendChild(p);
+    }
+  }
+}
+
+async function openCitation(chunkId) {
+  const r = await fetch(`/api/chunk/${encodeURIComponent(chunkId)}`);
+  const bg = document.getElementById("modal-bg");
+  const title = document.getElementById("modal-title");
+  const meta = document.getElementById("modal-meta");
+  const txt = document.getElementById("modal-text");
+  if (!r.ok) {
+    title.textContent = "Citation not resolved";
+    meta.textContent = chunkId;
+    txt.textContent = "Server returned " + r.status;
+    bg.classList.add("open");
+    return;
+  }
+  const j = await r.json();
+  title.textContent = j.citation;
+  meta.textContent = `${j.source_title} · ${j.doc_type} · pages ${j.page_start}–${j.page_end} · id ${j.chunk_id}`;
+  txt.textContent = j.text;
+  bg.classList.add("open");
+}
+
+document.getElementById("modal-close").addEventListener("click", () => {
+  document.getElementById("modal-bg").classList.remove("open");
+});
+document.getElementById("modal-bg").addEventListener("click", (e) => {
+  if (e.target.id === "modal-bg") e.target.classList.remove("open");
+});
+
+async function streamFromEndpoint(endpoint, statusLabel) {
+  if (inFlight || !selectedDemo) return;
+  inFlight = true;
+  document.getElementById("generate").disabled = true;
+  document.getElementById("replay").disabled = true;
+  document.getElementById("status").textContent = statusLabel;
+  const out = document.getElementById("output");
+  clear(out);
+  const aarRoot = el("div", { cls: "aar" });
+  out.appendChild(aarRoot);
+  const sections = {};
+
+  const resp = await fetch(endpoint, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({demo_id: selectedDemo}),
+  });
+  if (!resp.ok || !resp.body) {
+    const status = document.getElementById("status");
+    clear(status);
+    status.appendChild(el("span", { cls: "gate-fail", text: `Server error: ${resp.status}` }));
+    inFlight = false;
+    document.getElementById("generate").disabled = false;
+    document.getElementById("replay").disabled = !demoCacheStatus[selectedDemo];
+    return;
+  }
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const r = await reader.read();
+    if (r.done) break;
+    buffer += decoder.decode(r.value, {stream: true});
+    let idx;
+    while ((idx = buffer.indexOf("\n\n")) !== -1) {
+      const raw = buffer.slice(0, idx).trim();
+      buffer = buffer.slice(idx + 2);
+      if (!raw.startsWith("data:")) continue;
+      const json = raw.slice(5).trim();
+      try {
+        handleEvent(JSON.parse(json), aarRoot, sections);
+      } catch (err) {
+        console.error("bad SSE payload", err, raw);
+      }
+    }
+  }
+  document.getElementById("generate").disabled = false;
+  // After fresh generation, this demo is now cached.
+  if (endpoint === "/api/generate") {
+    demoCacheStatus[selectedDemo] = true;
+    // Update the cache tag in the demo list without a full refetch.
+    const tag = document.querySelector(`.demo-row[data-id="${selectedDemo}"] .cache-tag`);
+    if (tag) {
+      tag.classList.remove("empty");
+      tag.textContent = "saved";
+    }
+  }
+  document.getElementById("replay").disabled = !demoCacheStatus[selectedDemo];
+  const statusEl = document.getElementById("status");
+  clear(statusEl);
+  statusEl.appendChild(el("span", { cls: "gate-pass", text: "Done." }));
+  inFlight = false;
+}
+
+const startGenerate = () => streamFromEndpoint("/api/generate", "Generating fresh…");
+const startReplay = () => streamFromEndpoint("/api/replay", "Replaying saved…");
+
+function handleEvent(ev, aarRoot, sections) {
+  if (ev.type === "aar_start") {
+    aarRoot.appendChild(el("h1", { text: ev.title }));
+  } else if (ev.type === "section_start") {
+    const block = el("div", { cls: "section-block streaming" });
+    const meta = el("div", { cls: "section-meta", text: SECTION_LABELS[ev.section_id] || ev.section_id });
+    const body = el("div", { cls: "section-body" });
+    block.appendChild(meta);
+    block.appendChild(body);
+    aarRoot.appendChild(block);
+    sections[ev.section_id] = { block, body, raw: "" };
+  } else if (ev.type === "token") {
+    const s = sections[ev.section_id];
+    if (s) {
+      // "Tail mode" — only follow the new content if the user was already
+      // near the bottom. If they've scrolled up to read, leave them alone.
+      const wasAtBottom = isNearBottom();
+      s.raw += ev.text;
+      renderMarkdownInto(s.body, s.raw);
+      if (wasAtBottom) {
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" });
+      }
+    }
+  } else if (ev.type === "section_end") {
+    const s = sections[ev.section_id];
+    if (s) {
+      s.block.classList.remove("streaming");
+      s.block.classList.add("done");
+      s.block.appendChild(el("div", {
+        cls: "gate-pass",
+        text: `✓ Citation gate: ${ev.cited_chunk_ids.length} citation(s) verified.`,
+      }));
+    }
+  } else if (ev.type === "section_error") {
+    const s = sections[ev.section_id];
+    if (s) {
+      s.block.classList.remove("streaming");
+      s.block.classList.add("error");
+      s.block.appendChild(el("div", { cls: "gate-fail", text: `✗ Citation gate FAILED: ${ev.error}` }));
+    }
+  } else if (ev.type === "fatal") {
+    const status = document.getElementById("status");
+    clear(status);
+    status.appendChild(el("span", { cls: "gate-fail", text: `Fatal: ${ev.error}` }));
+  }
+}
+
+document.getElementById("generate").addEventListener("click", startGenerate);
+document.getElementById("replay").addEventListener("click", startReplay);
+loadHealth();
+loadDemos();
+</script>
+</body>
+</html>

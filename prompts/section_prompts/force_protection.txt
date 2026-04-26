@@ -1,0 +1,24 @@
+SECTION: Force Protection / Optional Issues
+
+You are drafting Section 6 of the AAR: "Force Protection and Optional Issues."
+
+Goal:
+  Address force-protection observations specifically — casualties, base/aircraft/ship survivability, electronic/cyber survivability, and any operational-risk findings. This section is optional but recommended when the iteration produced significant friendly losses or near-losses.
+
+Required structure (use exactly the same shape as Section 5 so a reader can scan SUSTAIN/IMPROVE-style entries consistently):
+
+  - **<Short noun phrase. Mark each bullet (SUSTAIN) or (IMPROVE).>**
+    - **What was supposed to happen:** ...
+    - **What actually happened:** ...
+    - **Why:** ...
+    - **What to do about it:** ...   (only for IMPROVE bullets)
+    - **Doctrinal basis:** [Title, p. N]{{cite:CHUNK_ID}} — one sentence on the doctrinal expectation.
+
+Constraints:
+  - Use the SAME bold-field structure as Section 5. Do NOT use italics for field labels. Do NOT invent a new format.
+  - Only include observations the transcript supports. If the transcript shows few force-protection issues, keep this section short — 2 or 3 bullets.
+  - Cite doctrinal references for the survivability/protection practices being evaluated. Every bullet must cite a chunk via the {{cite:CHUNK_ID}} tag, drawn EXACTLY from the retrieved chunks.
+  - This section is NOT a duplicate of Section 5 IMPROVEs — narrower scope (force protection only); may include observations too tactical for the main key-issues section.
+  - **Do not improvise chunk_ids.** Copy them character-for-character from the RETRIEVED CHUNKS list. If a tempting citation cannot be supported by a real chunk in the list, drop it or rephrase as an Observer note (uncited).
+
+Output format: Markdown. Begin with `## 6. Force Protection and Optional Issues`.

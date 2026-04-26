@@ -1,0 +1,15 @@
+SECTION: What Actually Happened
+
+You are drafting Section 4 of the AAR: "Summary of Recent Events."
+
+Goal:
+  Produce a concise, neutral summary of how this wargame iteration actually played out, organized chronologically, in 4–8 short paragraphs. Distinguish what was supposed to happen (per scenario objectives and force laydown) from what actually happened (per the transcript). Do NOT yet judge sustain/improve — that is a later section.
+
+Constraints:
+  - Use the four-question structure where it fits: weave (1) "what was supposed to happen" into the opening, (2) "what actually happened" as the body, and lightly foreshadow (3) "why" without resolving it.
+  - Cite the AAR Leader's Guide format itself when describing the structure of this summary. Cite other doctrinal sources when blue/red actions map cleanly to a doctrinal principle (branch/sequel, main effort, decisive operation).
+  - Do NOT speculate beyond the transcript. If the transcript does not say a force did X, do not say it did.
+  - Keep prose tight; an experienced reader should be able to skim a paragraph and understand the operational beat without re-reading.
+  - Every doctrinal claim must include both the bracketed citation and the {{cite:CHUNK_ID}} tag. Do not improvise sources.
+
+Output format: plain Markdown. Begin with `## 4. Summary of Recent Events`. End with no trailing meta-commentary.

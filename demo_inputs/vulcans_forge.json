@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "title": "Relighting Vulcan's Forge — Tabletop, Round 2 (Tech-Augmented Defense of Taiwan)",
+    "scenario": "Same PRC invasion premise as the CSIS Base Case, but the Blue side has fielded a representative subset of the 17 private-sector technological solutions identified in Ryseff et al. (RAND RRA2930-1). The wargame examines whether and where these private-sector innovations meaningfully change the outcome relative to the unaugmented base case. Synthesized from 'Harnessing the Power of Private Sector Innovation to Defeat a Chinese Invasion of Taiwan: Relighting Vulcan's Forge' (RAND, 2024).",
+    "objectives": [
+      "Assess marginal contribution of seven prioritized commercial-tech capabilities to operational outcomes.",
+      "Identify which capabilities provide outsized leverage at low integration cost.",
+      "Surface integration friction between commercial systems and DoD command and control.",
+      "Recommend acquisition pathways for the most promising solutions."
+    ],
+    "source": "RAND, 'Relighting Vulcan's Forge' (RRA2930-1, 2024).",
+    "force_lay": "Blue: same baseline as CSIS Base Case, augmented with: (1) commercial low-Earth-orbit imagery refresh on a sub-hourly cadence, (2) an autonomous maritime surface-vessel screen forward of the strike groups, (3) software-defined long-range one-way attack munitions, (4) a federated-data fusion layer linking JSDF, USAF, USN, and Taiwan sensor feeds. Red: PLA forces as in baseline."
+  },
+  "entries": [
+    {
+      "name": "Narrator",
+      "text": "Pre-game. The Blue side enters with the Vulcan's Forge augmented kit operational at limited but real scale: roughly 600 commercial smallsats supporting refresh, 80 autonomous surface vessels (ASVs), 4,000 long-range OWA munitions (a software-defined family fielded in the past 18 months), and a coalition data-fusion layer that has been live for 9 months but whose performance under battlefield-grade jamming has not been tested at scale."
+    },
+    {
+      "name": "Red Cell (PRC Eastern Theater)",
+      "text": "Opening volley as before — PLARF salvo against carriers and shore bases, PLAAF strike, amphibious sortie. The PRC operational planners are aware Blue has acquired commercial space and autonomy capabilities, but treat them as unproven and apply baseline targeting. Cyber and ASAT effort prioritizes the data-fusion layer and known commercial space ground stations."
+    },
+    {
+      "name": "Adjudicator",
+      "text": "Day 1, T+0 to T+6 hours. Sub-hourly commercial space refresh provides Blue with persistent track on the amphibious group from sortie. Targeting cycle for the LRASM/JASSM-ER salvo collapses from hours to roughly 25 minutes. The first salvo is launched 2 hours earlier than in the unaugmented case, before the PLA strike package is fully airborne. PLAN ship defenses are not in their highest readiness state when the Blue salvo arrives."
+    },
+    {
+      "name": "Blue Cell (USINDOPACOM JTF)",
+      "text": "Autonomous surface vessels are released into the strait under permissive ROE. The 80-vessel screen presents a distributed sensor and shooter mesh ahead of the carrier strike group; ASVs operate as picket and as decoy to draw PLAAF anti-ship missile expenditure. Long-range OWA munitions are launched in coordinated swarms against the amphibious shipping; their lower per-unit cost permits saturation patterns infeasible with LRASM alone."
+    },
+    {
+      "name": "Adjudicator",
+      "text": "Days 1–3. ASV screen draws an estimated 22% of inbound PLAAF anti-ship missile sortie weight. The OWA swarm achieves higher than expected per-shot effects because PLAN interceptor inventory is exhausted faster against mixed salvos (LRASM + OWA + JASSM-ER). PLA Eastern Theater reports first-wave lift losses substantially above the unaugmented base-case mean. Commercial space refresh degrades by approximately 30% as PLA cyber and ASAT actions begin to bite, but persistent track is not lost."
+    },
+    {
+      "name": "Red Cell (PRC Eastern Theater)",
+      "text": "Adjustment. Counter-targeting against ASVs is inefficient; per-engagement munitions cost-exchange favors Blue significantly. PLAN amphibious commander requests reconsideration of the second-wave commitment. PLA Central Military Commission orders the second wave forward regardless, citing political imperative and concern that delay will allow Blue to reset. Cyber escalation: attempted intrusion of the Blue data-fusion layer to inject false tracks."
+    },
+    {
+      "name": "Blue Cell (USINDOPACOM JTF)",
+      "text": "Data-fusion layer detects coordinated false-track injection attempts and isolates affected feeds within minutes — a capability that did not exist in the unaugmented base case. Coalition picture remains coherent. However, OWA munitions inventory is being depleted faster than projected; production-base resilience becomes the limiting factor by approximately Day 7."
+    },
+    {
+      "name": "Japan (JSDF Joint Staff)",
+      "text": "JSDF reports the federated-data layer was operationally consequential: JASDF and US Navy were able to deconflict and concentrate fires on the same target sets without traditional liaison delays. Without this capability, JSDF assesses that an estimated 18% of fires would have been duplicated or self-deconflicted in ways that wasted munitions. Recommendation: institutionalize this fusion arrangement before the next contingency."
+    },
+    {
+      "name": "Adjudicator",
+      "text": "Days 4–14. Second wave is contained earlier and at lower Blue cost than the unaugmented base case. End-state munitions inventory across the joint force is at approximately 28% of pre-war (vs. 15% in the unaugmented case). Casualties on both sides are lower in absolute terms, with the largest delta on the Blue side being aircraft saved by reduced exposure during compressed engagement timelines."
+    },
+    {
+      "name": "Adjudicator",
+      "text": "End-state at Day 18. Coalition victory; Taiwan retains autonomy. The marginal contribution of the Vulcan's Forge kit is judged decisive at the operational-tempo and munitions-economy levels, not at the casualty level alone. The data-fusion layer is the single most important integration artifact. The OWA family changes the math of saturation attacks but creates new industrial-base demand. ASVs prove their value as a force-multiplier per dollar but their integration into strike-group ROE was the most contested doctrinal issue of the game."
+    },
+    {
+      "name": "Narrator",
+      "text": "Adjournment. Players surface persistent integration issues: ROE for autonomous platforms in mixed civilian/military waters; classification mismatches between commercial-cleared and DoD-cleared operators; and concern that the OWA and ASV pipelines depend on a small number of commercial primes whose surge capacity is unproven. The game closes with seven of seventeen prioritized capabilities tested; ten remain to be exercised in subsequent rounds."
+    }
+  ]
+}

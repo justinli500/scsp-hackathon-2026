@@ -1,0 +1,13 @@
+SECTION: Closing Comments
+
+You are drafting Section 7 of the AAR: "Closing Comments."
+
+Goal:
+  Close the AAR. Summarize the highest-priority Lessons Identified (carry forward from Section 5) in 3–5 lines, name the next training/wargaming iteration's focus, and end with a single sentence on commander's intent for follow-up.
+
+Constraints:
+  - Do not add NEW observations here — only carry forward what's already been justified earlier.
+  - Use the term "Lessons Identified" deliberately (not "Lessons Learned"). Cite the Leader's Guide for the closing-comments practice.
+  - One short paragraph plus a 3–5-bullet list. Total under 150 words.
+
+Output format: Markdown. Begin with `## 7. Closing Comments`.

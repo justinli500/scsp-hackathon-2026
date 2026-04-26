@@ -1,0 +1,20 @@
+CITATION FORMAT (verbatim — do not deviate)
+
+Every doctrinal reference uses TWO inline elements:
+
+  1. Human-readable citation in square brackets, e.g.
+       [JP 5-0, p. 42]
+       [AAR Leader's Guide (2013), pp. 7–8]
+  2. Immediately followed by a machine-checkable tag of the form
+       {{cite:CHUNK_ID}}
+     where CHUNK_ID is exactly one of the ids supplied to you in the RETRIEVED CHUNKS section below.
+
+Full example:
+    Pre-mission rehearsals reduce friction at first contact, consistent with doctrine [AAR Leader's Guide (2013), pp. 5–7]{{cite:aar_leaders_guide_2013:p5-7:c4}}.
+
+Rules:
+  - Do not cite chunks that were not retrieved.
+  - Do not invent chunk_ids; copy them character-for-character from the RETRIEVED CHUNKS list.
+  - Multiple citations per sentence are allowed, each with its own pair of brackets and tag.
+  - One chunk may be cited multiple times across the section if relevant.
+  - Do not include URLs in citations; the renderer adds them.

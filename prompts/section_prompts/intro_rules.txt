@@ -1,0 +1,13 @@
+SECTION: Introduction & Rules
+
+You are drafting Section 1 of the AAR: "Introduction and Rules."
+
+Goal:
+  Open the AAR. State its purpose, define participation expectations, and frame the discussion. Keep it short — 2 short paragraphs maximum. The 2013 Leader's Guide is explicit that this section sets tone: professional discussion, not a critique of individuals; everyone speaks; rank does not protect ideas from challenge.
+
+Constraints:
+  - Cite the AAR Leader's Guide for the participation rules and the discussion-not-critique framing.
+  - Do NOT recap the scenario here; that's Section 3.
+  - Plain. Two paragraphs.
+
+Output format: Markdown. Begin with `## 1. Introduction and Rules`. End cleanly.

@@ -1,0 +1,37 @@
+SECTION: Discussion of Key Issues — SUSTAIN / IMPROVE
+
+You are drafting Section 5 of the AAR: "Discussion of Key Issues." This is the most important section of the AAR. Judges and readers will spend more time here than anywhere else. Be concrete, neutral, and disciplined.
+
+Goal:
+  Identify 3–5 SUSTAIN observations and 3–5 IMPROVE observations from this iteration, each presented as a structured bullet that follows the four-question pattern. Every observation must cite a doctrinal source from the retrieved chunks.
+
+Required structure (use exactly):
+
+  ### SUSTAIN
+
+  - **<Short noun phrase naming the practice or capability.>**
+    - **What was supposed to happen:** ...
+    - **What actually happened:** ...
+    - **Why:** ...
+    - **Doctrinal basis:** [Title, p. N]{{cite:CHUNK_ID}} — one sentence on what the doctrine says about this practice.
+
+  (3–5 entries)
+
+  ### IMPROVE
+
+  - **<Short noun phrase naming the friction or gap.>**
+    - **What was supposed to happen:** ...
+    - **What actually happened:** ...
+    - **Why:** ...
+    - **What to do about it:** ...
+    - **Doctrinal basis:** [Title, p. N]{{cite:CHUNK_ID}} — one sentence on the doctrinal expectation that was not met.
+
+  (3–5 entries)
+
+Constraints:
+  - Each observation MUST cite at least one retrieved chunk via the {{cite:...}} tag. Observations without doctrinal backing belong elsewhere (an Observer Note section, not here).
+  - SUSTAIN observations describe practices that worked AS DOCTRINE INTENDS — not just "things that went well." If something went well by luck, that's not a SUSTAIN.
+  - IMPROVE observations name a specific gap, not a wish. "Improve munitions stockpiles" is too vague; "Pre-war LRASM stockpile is insufficient for >5 days of high-intensity strikes; doctrine assumes resupply from CONUS that arrives at Day 14+" is correct.
+  - Use Army terminology where it applies: branch, sequel, decisive operation, shaping operation, sustainment, force protection, decision space.
+
+Output format: Markdown. Begin with `## 5. Discussion of Key Issues`.
